@@ -6,7 +6,7 @@ import (
 
 	"github.com/Hatch1fy/errors"
 	"github.com/boltdb/bolt"
-	"gitlab.com/adsengineering/dbutils"
+	"gitlab.com/itsMontoya/dbutils"
 )
 
 const (
