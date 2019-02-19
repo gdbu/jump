@@ -28,32 +28,25 @@ const (
 )
 
 // New will return a new instance of Jump
-func New(cfg *Config) (jp *Jump, err error) {
-	if cfg == nil {
-		cfg = &defaultConfig
-	}
-
+func New(dir string) (jp *Jump, err error) {
 	var j Jump
 	j.out = journaler.New("Jump")
-	j.cfg = cfg
-
-	if j.perm, err = permissions.New(cfg.DataDir); err != nil {
+	if j.perm, err = permissions.New(dir); err != nil {
 		return
 	}
 
-	if j.sess, err = sessions.New(cfg.DataDir); err != nil {
+	if j.sess, err = sessions.New(dir); err != nil {
 		return
 	}
 
-	if j.api, err = apikeys.New(cfg.DataDir); err != nil {
+	if j.api, err = apikeys.New(dir); err != nil {
 		return
 	}
 
-	if j.usrs, err = users.New(cfg.DataDir); err != nil {
+	if j.usrs, err = users.New(dir); err != nil {
 		return
 	}
 
-	j.srv = httpserve.New()
 	jp = &j
 	return
 }
@@ -61,13 +54,11 @@ func New(cfg *Config) (jp *Jump, err error) {
 // Jump manages the basic ancillary components of a web service
 type Jump struct {
 	out *journaler.Journaler
-	cfg *Config
 
 	perm *permissions.Permissions
 	sess *sessions.Sessions
 	api  *apikeys.APIKeys
 	usrs *users.Users
-	srv  *httpserve.Serve
 }
 
 // setPermission will give permissions to a provided group for a resourceKey
@@ -188,7 +179,7 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Conte
 }
 
 // NewCheckPermissionsMW will check the user to ensure they have permissions to view a particular resource
-func (j *Jump) NewCheckPermissionsMW(groupName, paramKey string) httpserve.Handler {
+func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Handler {
 	return func(ctx *httpserve.Context) (res httpserve.Response) {
 		userID := ctx.Get("userID")
 		if len(userID) == 0 {
@@ -212,9 +203,9 @@ func (j *Jump) NewCheckPermissionsMW(groupName, paramKey string) httpserve.Handl
 
 		var resourceID string
 		if len(paramKey) > 0 {
-			resourceID = newResourceKey(groupName, ctx.Param(paramKey))
+			resourceID = newResourceKey(resourceName, ctx.Param(paramKey))
 		} else {
-			resourceID = groupName
+			resourceID = resourceName
 		}
 
 		if !j.perm.Can(userID, resourceID, action) {
@@ -223,16 +214,6 @@ func (j *Jump) NewCheckPermissionsMW(groupName, paramKey string) httpserve.Handl
 
 		return
 	}
-}
-
-// Listen will listen to the configured port and tls port
-func (j *Jump) Listen() (err error) {
-	go func() {
-		u := httpserve.NewUpgrader(j.cfg.TLSPort)
-		u.Listen(j.cfg.Port)
-	}()
-
-	return j.srv.ListenTLS(j.cfg.TLSPort, j.cfg.TLSDir)
 }
 
 // CreateUser will create a user and assign it's basic groups
@@ -260,11 +241,6 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 // Users will return the users controller
 func (j *Jump) Users() *users.Users {
 	return j.usrs
-}
-
-// Router will return the internal jump router
-func (j *Jump) Router() *httpserve.Serve {
-	return j.srv
 }
 
 // APIKeys will return the internal api keys controller
