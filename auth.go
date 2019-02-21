@@ -10,3 +10,5 @@ func (j *Jump) Login(email, password string) (key, token string, err error) {
 
 	return j.NewSession(userID)
 }
+
+// TODO: Logout

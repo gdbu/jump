@@ -28,3 +28,9 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 
 	return
 }
+
+// TODO Get user
+
+// TODO Update user email
+
+// TODO Update user password
