@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Hatch1fy/httpserve"
-	"github.com/Hatch1fy/jump/users"
 )
 
 // SetUserMW is will check user permissions. Expects the following arguments:
@@ -52,29 +51,4 @@ func GrantPermissionsMW(args ...string) (h httpserve.Handler, err error) {
 	adminActions := getPermissions(args[2])
 	h = p.jump.NewGrantPermissionsMW(resourceName, actions, adminActions)
 	return
-}
-
-// CreateUser is a handler for creating a new user
-func CreateUser(ctx *httpserve.Context) (res httpserve.Response) {
-	var (
-		user users.User
-		err  error
-	)
-
-	if err = ctx.BindJSON(&user); err != nil {
-		httpserve.NewJSONResponse(400, err)
-	}
-
-	var resp CreateUserResponse
-	if resp.UserID, resp.APIKey, err = p.jump.CreateUser(user.Email, user.Password, "users"); err != nil {
-		return httpserve.NewJSONResponse(400, err)
-	}
-
-	return httpserve.NewJSONResponse(200, resp)
-}
-
-// CreateUserResponse is returned after a user is created
-type CreateUserResponse struct {
-	UserID string `json:"userID"`
-	APIKey string `json:"apiKey"`
 }
