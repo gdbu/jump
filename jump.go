@@ -23,8 +23,17 @@ const (
 )
 
 const (
-	cookieKey   = "jump_key"
-	cookieToken = "jump_token"
+	permR   = permissions.ActionRead
+	permRW  = permissions.ActionRead | permissions.ActionWrite
+	permRWD = permissions.ActionRead | permissions.ActionWrite | permissions.ActionDelete
+	permWD  = permissions.ActionWrite | permissions.ActionDelete
+)
+
+const (
+	// CookieKey is the jump HTTP key
+	CookieKey = "jump_key"
+	// CookieToken is the jump HTTP token
+	CookieToken = "jump_token"
 )
 
 // New will return a new instance of Jump
@@ -88,12 +97,12 @@ func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
 
 func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error) {
 	var key *http.Cookie
-	if key, err = req.Cookie(cookieKey); err != nil {
+	if key, err = req.Cookie(CookieKey); err != nil {
 		return
 	}
 
 	var token *http.Cookie
-	if token, err = req.Cookie(cookieToken); err != nil {
+	if token, err = req.Cookie(CookieToken); err != nil {
 		return
 	}
 
@@ -167,7 +176,7 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Conte
 
 		if err != nil {
 			if !redirectOnFail {
-				return httpserve.NewJSONResponse(500, err)
+				return httpserve.NewJSONResponse(400, err)
 			}
 
 			return httpserve.NewRedirectResponse(302, "/login")
@@ -208,6 +217,7 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Ha
 			resourceID = resourceName
 		}
 
+		fmt.Println("Resource id", resourceID)
 		if !j.perm.Can(userID, resourceID, action) {
 			return httpserve.NewJSONResponse(401, errors.Error("forbidden"))
 		}
@@ -235,6 +245,10 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 		return
 	}
 
+	if err = j.SetPermission("user", userID, userID, permRWD, permRWD); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -251,4 +265,20 @@ func (j *Jump) APIKeys() *apikeys.APIKeys {
 // Permissions will return the intenral jump permissions
 func (j *Jump) Permissions() *permissions.Permissions {
 	return j.perm
+}
+
+// NewSession will generate a new session for a given user ID
+func (j *Jump) NewSession(userID string) (key, token string, err error) {
+	return j.sess.New(userID)
+}
+
+// Login will attempt to login with a provided email and password combo
+// If successful, a key/token pair will be returned to represent the session pair
+func (j *Jump) Login(email, password string) (key, token string, err error) {
+	var userID string
+	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
+		return
+	}
+
+	return j.NewSession(userID)
 }
