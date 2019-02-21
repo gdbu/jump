@@ -122,7 +122,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 		}
 
 		// Create resource key from resource name and resource id
-		resourceKey := newResourceKey(resourceName, resourceID)
+		resourceKey := NewResourceKey(resourceName, resourceID)
 
 		var err error
 		if err = j.setPermission(resourceKey, userID, actions, adminActions); err != nil {
@@ -132,6 +132,8 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 		return
 	}
 }
+
+// TODO: Implement all needed methods so we can remove these
 
 // Users will return the users controller
 func (j *Jump) Users() *users.Users {

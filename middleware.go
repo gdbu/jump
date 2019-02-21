@@ -81,7 +81,7 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Ha
 
 		var resourceID string
 		if len(paramKey) > 0 {
-			resourceID = newResourceKey(resourceName, ctx.Param(paramKey))
+			resourceID = NewResourceKey(resourceName, ctx.Param(paramKey))
 		} else {
 			resourceID = resourceName
 		}

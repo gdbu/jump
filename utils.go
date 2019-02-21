@@ -7,12 +7,14 @@ import (
 	"github.com/Hatch1fy/httpserve"
 )
 
-func newResourceKey(name, userID string) (resourceKey string) {
-	if len(userID) == 0 {
-		return name
+// NewResourceKey will return a new resource key from a given resource name and resource ID
+// Note: Providing an empty resourceID will treat the resource as a grouping resource (No ID association)
+func NewResourceKey(resourceName, resourceID string) (resourceKey string) {
+	if len(resourceID) == 0 {
+		return resourceName
 	}
 
-	return fmt.Sprintf("%s::%s", name, userID)
+	return fmt.Sprintf("%s::%s", resourceName, resourceID)
 }
 
 func getUserID(ctx *httpserve.Context) (userID string, err error) {
