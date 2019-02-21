@@ -133,12 +133,6 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 	}
 }
 
-// SetPermission will give permissions to a provided group for a resourceName:resourceID
-func (j *Jump) SetPermission(resourceName, resourceID, group string, actions, adminActions permissions.Action) (err error) {
-	resourceKey := newResourceKey(resourceName, resourceID)
-	return j.setPermission(resourceKey, group, actions, adminActions)
-}
-
 // Users will return the users controller
 func (j *Jump) Users() *users.Users {
 	return j.usrs
