@@ -19,7 +19,10 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 		return
 	}
 
-	if err = j.SetPermission("user", userID, userID, permRWD, permRWD); err != nil {
+	// Create a new resource key for the generated user ID
+	resourceKey := NewResourceKey("user", userID)
+
+	if err = j.SetPermission(resourceKey, userID, permRWD, permRWD); err != nil {
 		return
 	}
 

@@ -70,20 +70,6 @@ type Jump struct {
 	usrs *users.Users
 }
 
-// setPermission will give permissions to a provided group for a resourceKey
-func (j *Jump) setPermission(resourceKey, group string, actions, adminActions permissions.Action) (err error) {
-	if err = j.perm.SetPermissions(resourceKey, group, actions); err != nil && err != permissions.ErrPermissionsUnchanged {
-		return
-	}
-
-	if err = j.perm.SetPermissions(resourceKey, "admins", adminActions); err != nil && err != permissions.ErrPermissionsUnchanged {
-		return
-	}
-
-	err = nil
-	return
-}
-
 func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
 	var a *apikeys.APIKey
 	if a, err = j.api.Get(apiKey); err != nil {
@@ -125,7 +111,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 		resourceKey := NewResourceKey(resourceName, resourceID)
 
 		var err error
-		if err = j.setPermission(resourceKey, userID, actions, adminActions); err != nil {
+		if err = j.SetPermission(resourceKey, userID, actions, adminActions); err != nil {
 			j.out.Error("Error setting permissons for %s / %s: %v", userID, resourceName, err)
 		}
 

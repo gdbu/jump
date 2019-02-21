@@ -60,10 +60,13 @@ func (p *plugin) seed() (err error) {
 		return
 	}
 
-	if err = p.jump.SetPermission("users", "", "users", permissions.ActionNone, permRWD); err != nil {
+	// Set initial core permissions for users resource
+	resourceKey := newResourceKey("users", "")
+	if err = p.jump.SetPermission(resourceKey, "users", permissions.ActionNone, permRWD); err != nil {
 		return
 	}
 
+	// Create a seed user
 	if _, apiKey, err = p.jump.CreateUser("admin", "admin", "users", "admins"); err != nil {
 		return
 	}
