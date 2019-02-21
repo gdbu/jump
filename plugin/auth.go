@@ -1,79 +1,67 @@
 package main
 
 import (
-	"log"
-
-	"gitlab.com/itsMontoya/permissions"
+	"net/http"
 
 	"github.com/Hatch1fy/errors"
+	"github.com/Hatch1fy/httpserve"
 	"github.com/Hatch1fy/jump"
-	"github.com/missionMeteora/journaler"
+	"github.com/Hatch1fy/jump/users"
 )
 
 const (
-	// ErrResourceIDIsEmpty is returned when resource id is expected but not found withing a permissions hook
-	ErrResourceIDIsEmpty = errors.Error("resourceID is empty")
-	// ErrInvalidSetUserArguments is returned when an invalid number of set user arguments are provided
-	ErrInvalidSetUserArguments = errors.Error("invalid set user arguments, expecting no or one argument (redirectOnFail, optional)")
-	// ErrInvalidCheckPermissionsArguments is returned when an invalid number of check permissions arguments are provided
-	ErrInvalidCheckPermissionsArguments = errors.Error("invalid check permissions arguments, expecting two arguments (resource name and parameter key)")
-	// ErrInvalidGrantPermissionsArguments is returned when an invalid number of grant permissions arguments are provided
-	ErrInvalidGrantPermissionsArguments = errors.Error("invalid check permissions arguments, expecting three arguments (resource name, user actions, admin actions)")
+	// ErrAlreadyLoggedOut is returned when a logout is attempted for a user whom has already logged out of the system.
+	ErrAlreadyLoggedOut = errors.Error("already logged out")
 )
 
-const (
-	cookieKey   = "auth_key"
-	cookieToken = "auth_token"
-)
+// Login is the login handler
+func Login(ctx *httpserve.Context) (res httpserve.Response) {
+	var (
+		user users.User
+		err  error
+	)
 
-const (
-	permR   = permissions.ActionRead
-	permRW  = permissions.ActionRead | permissions.ActionWrite
-	permRWD = permissions.ActionRead | permissions.ActionWrite | permissions.ActionDelete
-	permWD  = permissions.ActionWrite | permissions.ActionDelete
-)
+	if err = ctx.BindJSON(&user); err != nil {
+		return httpserve.NewJSONResponse(400, err)
+	}
 
-var p plugin
+	var key, token string
+	if key, token, err = p.jump.Login(user.Email, user.Password); err != nil {
+		return httpserve.NewJSONResponse(400, err)
+	}
 
-// Init will initialize a plugin
-func init() {
+	keyC := setCookie(ctx.Request.URL.Host, jump.CookieKey, key)
+	tokenC := setCookie(ctx.Request.URL.Host, jump.CookieToken, token)
+
+	http.SetCookie(ctx.Writer, &keyC)
+	http.SetCookie(ctx.Writer, &tokenC)
+	return httpserve.NewNoContentResponse()
+}
+
+// Logout is the logout handler
+func Logout(ctx *httpserve.Context) (res httpserve.Response) {
 	var err error
-	dir := "./data"
-	p.out = journaler.New("Auth")
-	if p.jump, err = jump.New(dir); err != nil {
-		log.Fatalf("error initializing jump: %v", err)
+	userID := ctx.Get("userID")
+	if len(userID) == 0 {
+		return httpserve.NewJSONResponse(400, ErrAlreadyLoggedOut)
 	}
 
-	if err = p.seed(); err != nil {
-		log.Fatalf("error seeding users: %v", err)
-	}
-}
-
-// Backend will return the plugin's backend
-func Backend() *jump.Jump {
-	return p.jump
-}
-
-type plugin struct {
-	out  *journaler.Journaler
-	jump *jump.Jump
-}
-
-func (p *plugin) seed() (err error) {
-	var apiKey string
-	if _, err = p.jump.Users().Get("00000000"); err == nil {
-		return
+	var key, token string
+	if key, err = getCookieValue(ctx.Request, jump.CookieKey); err != nil {
+		return httpserve.NewJSONResponse(400, err)
 	}
 
-	if err = p.jump.SetPermission("users", "", "users", permissions.ActionNone, permRWD); err != nil {
-		return
+	if token, err = getCookieValue(ctx.Request, jump.CookieToken); err != nil {
+		return httpserve.NewJSONResponse(400, err)
 	}
 
-	if _, apiKey, err = p.jump.CreateUser("admin", "", "users", "admins"); err != nil {
-		return
-	}
+	// TODO: Add in the immediate purging of this session ID from the jump library level
 
-	p.out.Success("Successfully created admin with api key of: %s", apiKey)
-	return
+	keyC := unsetCookie(ctx.Request.URL.Host, jump.CookieKey, key)
+	tokenC := unsetCookie(ctx.Request.URL.Host, jump.CookieToken, token)
 
+	http.SetCookie(ctx.Writer, &keyC)
+	http.SetCookie(ctx.Writer, &tokenC)
+
+	return httpserve.NewNoContentResponse()
 }
