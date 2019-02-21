@@ -15,7 +15,7 @@ func newUser(email, password string) (u User) {
 type User struct {
 	ID       string `json:"id"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 }
 
 // IsMatch returns if a provided password is a match for a user
