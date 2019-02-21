@@ -17,9 +17,7 @@ func GetUser(ctx *httpserve.Context) (res httpserve.Response) {
 		err  error
 	)
 
-	userID := ctx.Param("userID")
-
-	if user, err = p.jump.Users().Get(userID); err != nil {
+	if user, err = p.jump.GetUser(ctx.Param("userID")); err != nil {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
@@ -39,7 +37,7 @@ func UpdateEmail(ctx *httpserve.Context) (res httpserve.Response) {
 
 	userID := ctx.Get("userID")
 
-	if err = p.jump.Users().ChangeEmail(userID, user.Email); err != nil {
+	if err = p.jump.UpdateEmail(userID, user.Email); err != nil {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
@@ -57,9 +55,9 @@ func UpdatePassword(ctx *httpserve.Context) (res httpserve.Response) {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
-	userID := ctx.Get("userID")
+	userID := ctx.Param("userID")
 
-	if err = p.jump.Users().ChangePassword(userID, user.Password); err != nil {
+	if err = p.jump.UpdatePassword(userID, user.Password); err != nil {
 		return httpserve.NewJSONResponse(400, err)
 	}
 

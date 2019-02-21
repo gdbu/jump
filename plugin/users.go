@@ -43,10 +43,7 @@ func GetUsersList(ctx *httpserve.Context) (res httpserve.Response) {
 		err error
 	)
 
-	if err = p.jump.Users().ForEach(func(user *users.User) (err error) {
-		us = append(us, user)
-		return
-	}); err != nil {
+	if us, err = p.jump.GetUsersList(); err != nil {
 		return httpserve.NewJSONResponse(400, err)
 	}
 

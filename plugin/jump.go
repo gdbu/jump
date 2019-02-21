@@ -56,7 +56,7 @@ type plugin struct {
 
 func (p *plugin) seed() (err error) {
 	var apiKey string
-	if _, err = p.jump.Users().Get("00000000"); err == nil {
+	if _, err = p.jump.GetUser("00000000"); err == nil {
 		return
 	}
 

@@ -93,20 +93,3 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 
 	return j.sess.Get(key.Value, token.Value)
 }
-
-// TODO: Implement all needed methods so we can remove these
-
-// Users will return the users controller
-func (j *Jump) Users() *users.Users {
-	return j.usrs
-}
-
-// APIKeys will return the internal api keys controller
-func (j *Jump) APIKeys() *apikeys.APIKeys {
-	return j.api
-}
-
-// Permissions will return the intenral jump permissions
-func (j *Jump) Permissions() *permissions.Permissions {
-	return j.perm
-}
