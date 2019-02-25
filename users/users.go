@@ -186,10 +186,12 @@ func (u *Users) create(txn *bolt.Tx, user *User) (id string, err error) {
 
 // New will create a new user
 func (u *Users) New(email, password string) (id string, err error) {
-	user := newUser(email, password)
-	if err = user.Validate(); err != nil {
+	if len(email) == 0 {
+		err = ErrInvalidEmail
 		return
 	}
+
+	user := newUser(email, password)
 
 	if err = u.db.Update(func(txn *bolt.Tx) (err error) {
 		id, err = u.create(txn, &user)

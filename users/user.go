@@ -15,11 +15,15 @@ func newUser(email, password string) (u User) {
 type User struct {
 	ID       string `json:"id"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 }
 
 // IsMatch returns if a provided password is a match for a user
 func (u *User) IsMatch(password string) (match bool) {
+	if len(u.Password) == 0 {
+		return
+	}
+
 	hashed := []byte(u.Password)
 	pw := []byte(password)
 	return bcrypt.CompareHashAndPassword(hashed, pw) == nil
@@ -40,6 +44,10 @@ func (u *User) Validate() (err error) {
 }
 
 func (u *User) hashPassword() (err error) {
+	if len(u.Password) == 0 {
+		return
+	}
+
 	var hashed []byte
 	password := []byte(u.Password)
 	if hashed, err = bcrypt.GenerateFromPassword(password, 0); err != nil {
