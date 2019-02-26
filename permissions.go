@@ -17,4 +17,8 @@ func (j *Jump) SetPermission(resourceKey, group string, actions, adminActions pe
 	return
 }
 
-// TODO: Unset permission
+// UnsetPermission will remove permissions from a provided group for a resourceKey
+// Note: See NewResourceKey for more context
+func (j *Jump) UnsetPermission(resourceKey, group string) (err error) {
+	return j.perm.UnsetPermissions(resourceKey, group)
+}
