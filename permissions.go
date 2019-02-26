@@ -18,5 +18,3 @@ func (j *Jump) SetPermission(resourceKey, group string, actions, adminActions pe
 }
 
 // TODO: Unset permission
-
-// TODO Check if user has permissions for a given resource key
