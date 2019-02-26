@@ -3,15 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
 	"github.com/Hatch1fy/jump"
 	"github.com/Hatch1fy/jump/users"
-)
-
-const (
-	// ErrAlreadyLoggedOut is returned when a logout is attempted for a user whom has already logged out of the system.
-	ErrAlreadyLoggedOut = errors.Error("already logged out")
 )
 
 // Login is the login handler
@@ -55,7 +49,9 @@ func Logout(ctx *httpserve.Context) (res httpserve.Response) {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
-	// TODO: Add in the immediate purging of this session ID from the jump library level
+	if err = p.jump.Logout(key, token); err != nil {
+		return httpserve.NewJSONResponse(400, err)
+	}
 
 	keyC := unsetCookie(ctx.Request.URL.Host, jump.CookieKey, key)
 	tokenC := unsetCookie(ctx.Request.URL.Host, jump.CookieToken, token)

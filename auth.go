@@ -11,4 +11,7 @@ func (j *Jump) Login(email, password string) (key, token string, err error) {
 	return j.NewSession(userID)
 }
 
-// TODO: Logout
+// Logout will invalidate the session of a given key/token pair
+func (j *Jump) Logout(key, token string) (err error) {
+	return j.sess.Delete(key, token)
+}

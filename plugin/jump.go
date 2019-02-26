@@ -19,6 +19,8 @@ const (
 	ErrInvalidCheckPermissionsArguments = errors.Error("invalid check permissions arguments, expecting two arguments (resource name and parameter key)")
 	// ErrInvalidGrantPermissionsArguments is returned when an invalid number of grant permissions arguments are provided
 	ErrInvalidGrantPermissionsArguments = errors.Error("invalid check permissions arguments, expecting three arguments (resource name, user actions, admin actions)")
+	// ErrAlreadyLoggedOut is returned when a logout is attempted for a user whom has already logged out of the system.
+	ErrAlreadyLoggedOut = errors.Error("already logged out")
 )
 
 const (
