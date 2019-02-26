@@ -3,15 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
 	"github.com/Hatch1fy/jump"
 	"github.com/Hatch1fy/jump/users"
-)
-
-const (
-	// ErrAlreadyLoggedOut is returned when a logout is attempted for a user whom has already logged out of the system.
-	ErrAlreadyLoggedOut = errors.Error("already logged out")
 )
 
 // Login is the login handler
