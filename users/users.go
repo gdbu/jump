@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/Hatch1fy/errors"
+	"github.com/PathDNA/atoms"
 	"github.com/boltdb/bolt"
 	"gitlab.com/itsMontoya/dbutils"
 )
@@ -47,6 +48,8 @@ func New(dir string) (up *Users, err error) {
 type Users struct {
 	db  *bolt.DB
 	dbu *dbutils.DBUtils
+
+	closed atoms.Bool
 }
 
 func (u *Users) init(dir string) (err error) {
@@ -341,4 +344,13 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	}
 
 	return
+}
+
+// Close will close the selected instance of users
+func (u *Users) Close() (err error) {
+	if !u.closed.Set(true) {
+		return errors.ErrIsClosed
+	}
+
+	return u.db.Close()
 }

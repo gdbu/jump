@@ -26,13 +26,19 @@ func SetUserMW(args ...string) (h httpserve.Handler, err error) {
 //	- groupName (e.g. users)
 //	- paramKey (e.g. userID)
 func CheckPermissionsMW(args ...string) (h httpserve.Handler, err error) {
-	if len(args) != 2 {
+	var resourceName, paramKey string
+	switch len(args) {
+	case 1:
+		resourceName = args[0]
+	case 2:
+		resourceName = args[0]
+		paramKey = args[1]
+
+	default:
 		err = ErrInvalidCheckPermissionsArguments
 		return
 	}
 
-	resourceName := args[0]
-	paramKey := args[1]
 	h = p.jump.NewCheckPermissionsMW(resourceName, paramKey)
 	return
 }
