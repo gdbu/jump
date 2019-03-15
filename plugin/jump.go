@@ -46,8 +46,8 @@ func init() {
 	}
 }
 
-// Backend will return the plugin's backend
-func Backend() *jump.Jump {
+// Jump will return the plugin's backend
+func Jump() *jump.Jump {
 	return p.jump
 }
 
