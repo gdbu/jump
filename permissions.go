@@ -22,3 +22,13 @@ func (j *Jump) SetPermission(resourceKey, group string, actions, adminActions pe
 func (j *Jump) UnsetPermission(resourceKey, group string) (err error) {
 	return j.perm.UnsetPermissions(resourceKey, group)
 }
+
+// AddToGroup will add a user to a group
+func (j *Jump) AddToGroup(userID, group string) (err error) {
+	return j.perm.AddGroup(userID, group)
+}
+
+// RemoveFromGroup will remove a user from a group
+func (j *Jump) RemoveFromGroup(userID, group string) (err error) {
+	return j.perm.RemoveGroup(userID, group)
+}
