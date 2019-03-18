@@ -7,6 +7,7 @@ import (
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/jump"
+
 	"github.com/missionMeteora/journaler"
 )
 
@@ -46,11 +47,6 @@ func init() {
 	}
 }
 
-// Jump will return the plugin's backend
-func Jump() *jump.Jump {
-	return p.jump
-}
-
 type plugin struct {
 	out  *journaler.Journaler
 	jump *jump.Jump
@@ -76,4 +72,9 @@ func (p *plugin) seed() (err error) {
 	p.out.Success("Successfully created admin with api key of: %s", apiKey)
 	return
 
+}
+
+// Jump will return the plugin's backend
+func Jump() *jump.Jump {
+	return p.jump
 }
