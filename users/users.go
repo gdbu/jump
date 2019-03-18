@@ -3,14 +3,9 @@ package users
 import (
 	"github.com/Hatch1fy/errors"
 	core "github.com/Hatch1fy/service-core"
-	"github.com/PathDNA/atoms"
-	"github.com/boltdb/bolt"
-	"gitlab.com/itsMontoya/dbutils"
 )
 
 const (
-	// ErrNotInitialized is returned when a service has not been properly initialized
-	ErrNotInitialized = errors.Error("service not initialized")
 	// ErrInvalidEmail is returned when an empty email is provided
 	ErrInvalidEmail = errors.Error("invalid email, cannot be empty")
 	// ErrInvalidPassword is returned when an invalid password is provided
@@ -45,11 +40,6 @@ func New(dir string) (up *Users, err error) {
 // Users manages the users
 type Users struct {
 	c *core.Core
-
-	db  *bolt.DB
-	dbu *dbutils.DBUtils
-
-	closed atoms.Bool
 }
 
 func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *User, err error) {
@@ -221,9 +211,5 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 
 // Close will close the selected instance of users
 func (u *Users) Close() (err error) {
-	if !u.closed.Set(true) {
-		return errors.ErrIsClosed
-	}
-
-	return u.db.Close()
+	return u.c.Close()
 }
