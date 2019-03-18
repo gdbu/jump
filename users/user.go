@@ -13,9 +13,13 @@ func newUser(email, password string) (u User) {
 
 // User represents a user
 type User struct {
-	ID       string `json:"id"`
+	ID string `json:"id"`
+
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
+
+	CreatedAt int64 `json:"createdAt"`
+	UpdatedAt int64 `json:"updatedAt"`
 }
 
 // IsMatch returns if a provided password is a match for a user
@@ -56,4 +60,41 @@ func (u *User) hashPassword() (err error) {
 
 	u.Password = string(hashed)
 	return
+}
+
+// Everything below are methods required for the core.Value interface
+
+// GetID is a core.Value interface method which will get the user's ID
+func (u *User) GetID() (id string) {
+	return u.ID
+}
+
+// GetCreatedAt is a core.Value interface method which will get the user's created at timestamp
+func (u *User) GetCreatedAt() (createdAt int64) {
+	return u.CreatedAt
+}
+
+// GetUpdatedAt is a core.Value interface method which will get the user's updated at timestamp
+func (u *User) GetUpdatedAt() (updatedAt int64) {
+	return u.UpdatedAt
+}
+
+// GetRelationshipIDs will get the associated relationship IDs
+func (u *User) GetRelationshipIDs() (ids []string) {
+	return
+}
+
+// SetID is a core.Value interface method which will set the user's ID
+func (u *User) SetID(id string) {
+	u.ID = id
+}
+
+// SetCreatedAt is a core.Value interface method which will set the user's created at timestamp
+func (u *User) SetCreatedAt(createdAt int64) {
+	u.CreatedAt = createdAt
+}
+
+// SetUpdatedAt is a core.Value interface method which will set the user's updated at timestamp
+func (u *User) SetUpdatedAt(updatedAt int64) {
+	u.UpdatedAt = updatedAt
 }
