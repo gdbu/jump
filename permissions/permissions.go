@@ -100,7 +100,7 @@ func (p *Permissions) removeGroup(txn *core.Transaction, userID string, groups [
 	return
 }
 
-// Get will get the entry for a given resource ID
+// Get will get the resource entry for a given resource ID
 func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
 
 	var e Resource
@@ -112,7 +112,7 @@ func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
 	return
 }
 
-// GetByKey will get the permissions for a given group for a resource key
+// GetByKey will get the resource entry for a given resource key
 func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
 	return getByKey(p.c, resourceKey)
 }

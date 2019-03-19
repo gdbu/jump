@@ -15,7 +15,7 @@ type Transaction struct {
 	p   *Permissions
 }
 
-// Get will get the entry for a given resource ID
+// Get will get the resource entry for a given resource ID
 func (t *Transaction) Get(resourceID string) (rp *Resource, err error) {
 	var r Resource
 	if err = t.txn.Get(resourceID, &r); err != nil {
@@ -26,7 +26,7 @@ func (t *Transaction) Get(resourceID string) (rp *Resource, err error) {
 	return
 }
 
-// GetByKey will get the permissions for a given group for a resource key
+// GetByKey will get the resource entry for a given resource key
 func (t *Transaction) GetByKey(resourceKey string) (ep *Resource, err error) {
 	return getByKey(t.txn, resourceKey)
 }
