@@ -16,18 +16,18 @@ type Transaction struct {
 }
 
 // Get will get the entry for a given resource ID
-func (t *Transaction) Get(resourceID string) (ep *Entry, err error) {
-	var e Entry
-	if err = t.txn.Get(resourceID, &e); err != nil {
+func (t *Transaction) Get(resourceID string) (rp *Resource, err error) {
+	var r Resource
+	if err = t.txn.Get(resourceID, &r); err != nil {
 		return
 	}
 
-	ep = &e
+	rp = &r
 	return
 }
 
 // GetByKey will get the permissions for a given group for a resource key
-func (t *Transaction) GetByKey(resourceKey string) (ep *Entry, err error) {
+func (t *Transaction) GetByKey(resourceKey string) (ep *Resource, err error) {
 	return getByKey(t.txn, resourceKey)
 }
 
@@ -55,7 +55,7 @@ func (t *Transaction) RemoveGroup(userID string, groups ...string) (err error) {
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) {
 	var (
-		e      *Entry
+		e      *Resource
 		groups []string
 		err    error
 	)
@@ -79,7 +79,7 @@ func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) 
 
 // Has will return whether or not an ID has a particular group associated with it
 func (t *Transaction) Has(resourceID, group string) (ok bool) {
-	var e Entry
+	var e Resource
 	if err := t.txn.Get(resourceID, &e); err != nil {
 		return
 	}

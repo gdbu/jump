@@ -7,31 +7,31 @@ type source interface {
 	GetByRelationship(relationship, relationshipID string, value interface{}) error
 }
 
-func getByKey(s source, resourceKey string) (ep *Entry, err error) {
-	var es []*Entry
-	if err = s.GetByRelationship(relationshipResourceKeys, resourceKey, &es); err != nil {
+func getByKey(s source, resourceKey string) (r *Resource, err error) {
+	var rs []*Resource
+	if err = s.GetByRelationship(relationshipResourceKeys, resourceKey, &rs); err != nil {
 		return
 	}
 
-	if len(es) == 0 {
+	if len(rs) == 0 {
 		err = ErrResourceNotFound
 		return
 	}
 
-	ep = es[0]
+	r = rs[0]
 	return
 }
 
-func getOrCreateByKey(s source, resourceKey string) (ep *Entry, err error) {
-	if ep, err = getByKey(s, resourceKey); err != ErrResourceNotFound {
+func getOrCreateByKey(s source, resourceKey string) (rp *Resource, err error) {
+	if rp, err = getByKey(s, resourceKey); err != ErrResourceNotFound {
 		return
 	}
 
-	e := newEntry(resourceKey)
-	if _, err = s.New(&e); err != nil {
+	r := newResource(resourceKey)
+	if _, err = s.New(&r); err != nil {
 		return
 	}
 
-	ep = &e
+	rp = &r
 	return
 }

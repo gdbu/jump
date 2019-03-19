@@ -27,7 +27,7 @@ const (
 // New will return a new instance of Permissions
 func New(dir string) (pp *Permissions, err error) {
 	var p Permissions
-	if p.c, err = core.New("permissions", dir, &Entry{}, relationshipResourceKeys); err != nil {
+	if p.c, err = core.New("permissions", dir, &Resource{}, relationshipResourceKeys); err != nil {
 		return
 	}
 
@@ -41,29 +41,29 @@ type Permissions struct {
 }
 
 func (p *Permissions) setPermissions(txn *core.Transaction, resourceKey, group string, actions Action) (err error) {
-	var e *Entry
-	if e, err = getOrCreateByKey(txn, resourceKey); err != nil {
+	var r *Resource
+	if r, err = getOrCreateByKey(txn, resourceKey); err != nil {
 		return
 	}
 
-	if !e.Set(group, actions) {
+	if !r.Set(group, actions) {
 		return ErrPermissionsUnchanged
 	}
 
-	return txn.Edit(e.ID, e)
+	return txn.Edit(r.ID, r)
 }
 
 func (p *Permissions) unsetPermissions(txn *core.Transaction, resourceKey, group string) (err error) {
-	var e *Entry
-	if e, err = getByKey(txn, resourceKey); err != nil {
+	var r *Resource
+	if r, err = getByKey(txn, resourceKey); err != nil {
 		return
 	}
 
-	if !e.Remove(group) {
+	if !r.Remove(group) {
 		return ErrPermissionsUnchanged
 	}
 
-	return txn.Edit(e.ID, e)
+	return txn.Edit(r.ID, r)
 }
 
 func (p *Permissions) addGroup(txn *core.Transaction, userID string, groups []string) (err error) {
@@ -101,9 +101,9 @@ func (p *Permissions) removeGroup(txn *core.Transaction, userID string, groups [
 }
 
 // Get will get the entry for a given resource ID
-func (p *Permissions) Get(resourceID string) (ep *Entry, err error) {
+func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
 
-	var e Entry
+	var e Resource
 	if err = p.c.Get(resourceID, &e); err != nil {
 		return
 	}
@@ -113,7 +113,7 @@ func (p *Permissions) Get(resourceID string) (ep *Entry, err error) {
 }
 
 // GetByKey will get the permissions for a given group for a resource key
-func (p *Permissions) GetByKey(resourceKey string) (ep *Entry, err error) {
+func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
 	return getByKey(p.c, resourceKey)
 }
 
@@ -157,7 +157,7 @@ func (p *Permissions) RemoveGroup(userID string, groups ...string) (err error) {
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) {
 	var (
-		e      *Entry
+		e      *Resource
 		groups []string
 		err    error
 	)
@@ -181,7 +181,7 @@ func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) 
 
 // Has will return whether or not an ID has a particular group associated with it
 func (p *Permissions) Has(resourceID, group string) (ok bool) {
-	var e Entry
+	var e Resource
 	if err := p.c.Get(resourceID, &e); err != nil {
 		return
 	}
