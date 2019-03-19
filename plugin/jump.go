@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"gitlab.com/itsMontoya/permissions"
+	"github.com/Hatch1fy/jump/permissions"
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/jump"
@@ -76,5 +76,10 @@ func (p *plugin) seed() (err error) {
 
 // Jump will return the plugin's backend
 func Jump() *jump.Jump {
+	return p.jump
+}
+
+// Backend will return the plugin's backend
+func Backend() interface{} {
 	return p.jump
 }

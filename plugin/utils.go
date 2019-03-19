@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/itsMontoya/permissions"
+	"github.com/Hatch1fy/jump/permissions"
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"

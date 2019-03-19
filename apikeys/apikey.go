@@ -51,8 +51,8 @@ func (a *APIKey) GetUpdatedAt() (updatedAt int64) { return a.UpdatedAt }
 
 // GetRelationshipIDs will get the associated relationship IDs
 func (a *APIKey) GetRelationshipIDs() (ids []string) {
-	ids = append(ids, a.UserID)
 	ids = append(ids, a.Key)
+	ids = append(ids, a.UserID)
 	return
 }
 

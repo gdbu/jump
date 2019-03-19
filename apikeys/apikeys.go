@@ -20,14 +20,18 @@ const (
 )
 
 const (
-	relationshipUsers = "users"
 	relationshipKeys  = "keys"
+	relationshipUsers = "users"
+)
+
+var (
+	relationships = []string{relationshipKeys, relationshipUsers}
 )
 
 // New will return a new instance of APIKeys
 func New(dir string) (ap *APIKeys, err error) {
 	var a APIKeys
-	if a.c, err = core.New("apikeys", dir, &APIKey{}, relationshipUsers); err != nil {
+	if a.c, err = core.New("apikeys", dir, &APIKey{}, relationships...); err != nil {
 		return
 	}
 

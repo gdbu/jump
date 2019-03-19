@@ -7,11 +7,11 @@ import (
 	"github.com/missionMeteora/journaler"
 
 	"github.com/Hatch1fy/errors"
-	"github.com/Hatch1fy/jump/users"
 
-	"gitlab.com/itsMontoya/apikeys"
-	"gitlab.com/itsMontoya/permissions"
-	"gitlab.com/itsMontoya/sessions"
+	"github.com/Hatch1fy/jump/apikeys"
+	"github.com/Hatch1fy/jump/permissions"
+	"github.com/Hatch1fy/jump/sessions"
+	"github.com/Hatch1fy/jump/users"
 )
 
 const (
@@ -92,4 +92,9 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 	}
 
 	return j.sess.Get(key.Value, token.Value)
+}
+
+// Permissions will return the underlying permissions
+func (j *Jump) Permissions() *permissions.Permissions {
+	return j.perm
 }
