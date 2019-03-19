@@ -2,7 +2,7 @@ package permissions
 
 func newEntry(key string) (e Entry) {
 	e.Key = key
-	e.Resource = make(Resource)
+	e.Groups = make(Groups)
 	return
 }
 
@@ -10,8 +10,8 @@ func newEntry(key string) (e Entry) {
 type Entry struct {
 	ID string `json:"id"`
 
-	Key      string `json:"key"`
-	Resource `json:"resource"`
+	Key    string `json:"key"`
+	Groups `json:"groups"`
 
 	CreatedAt int64 `json:"createdAt"`
 	UpdatedAt int64 `json:"updatedAt"`
