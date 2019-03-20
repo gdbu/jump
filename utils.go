@@ -5,6 +5,16 @@ import (
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
+	"github.com/Hatch1fy/jump/permissions"
+)
+
+const (
+	// PermR is a read-only alias
+	PermR = permissions.ActionRead
+	// PermRW is a read/write alias
+	PermRW = permissions.ActionRead | permissions.ActionWrite
+	// PermRWD is a read/write/delete alias
+	PermRWD = permissions.ActionRead | permissions.ActionWrite | permissions.ActionDelete
 )
 
 // NewResourceKey will return a new resource key from a given resource name and resource ID
