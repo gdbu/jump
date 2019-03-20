@@ -66,6 +66,15 @@ func (p *Permissions) unsetPermissions(txn *core.Transaction, resourceKey, group
 	return txn.Edit(r.ID, r)
 }
 
+func (p *Permissions) removeResource(txn *core.Transaction, resourceKey string) (err error) {
+	var r *Resource
+	if r, err = getByKey(txn, resourceKey); err != nil {
+		return
+	}
+
+	return txn.Remove(r.ID)
+}
+
 func (p *Permissions) addGroup(txn *core.Transaction, userID string, groups []string) (err error) {
 	updated := false
 	for _, group := range groups {
@@ -192,6 +201,15 @@ func (p *Permissions) Has(resourceID, group string) (ok bool) {
 // Groups will return a slice of the groups a user belongs to
 func (p *Permissions) Groups(userID string) (groups []string, err error) {
 	return p.c.GetLookup(lookupGroups, userID)
+}
+
+// RemoveResource will remove a resource by key
+func (p *Permissions) RemoveResource(resourceKey string) (err error) {
+	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+		return p.removeResource(txn, resourceKey)
+	})
+
+	return
 }
 
 // Transaction will initialize a transaction for all methods to be executed under
