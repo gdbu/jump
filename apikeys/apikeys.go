@@ -77,19 +77,8 @@ func (a *APIKeys) New(userID, name string) (key string, err error) {
 	return
 }
 
-// Get will return the APIKey associated with the provided id
-func (a *APIKeys) Get(id string) (apiKey *APIKey, err error) {
-	var key APIKey
-	if err = a.c.Get(id, &key); err != nil {
-		return
-	}
-
-	apiKey = &key
-	return
-}
-
-// GetByKey will return the APIKey associated with the provided apiKey
-func (a *APIKeys) GetByKey(key string) (apiKey *APIKey, err error) {
+// Get will return the APIKey associated with the provided apiKey
+func (a *APIKeys) Get(key string) (apiKey *APIKey, err error) {
 	var as []*APIKey
 	if err = a.c.GetByRelationship(relationshipKeys, key, &as); err != nil {
 		return
