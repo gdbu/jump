@@ -83,3 +83,8 @@ func Jump() *jump.Jump {
 func Backend() interface{} {
 	return p.jump
 }
+
+// Close will close the Jump plugin and underlying Jump library
+func Close() error {
+	return p.jump.Close()
+}

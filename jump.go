@@ -98,3 +98,13 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 func (j *Jump) Permissions() *permissions.Permissions {
 	return j.perm
 }
+
+// Close will close jump
+func (j *Jump) Close() (err error) {
+	var errs errors.ErrorList
+	errs.Push(j.usrs.Close())
+	errs.Push(j.sess.Close())
+	errs.Push(j.api.Close())
+	errs.Push(j.perm.Close())
+	return errs.Err()
+}
