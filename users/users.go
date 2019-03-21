@@ -117,6 +117,10 @@ func (u *Users) New(email, password string) (id string, err error) {
 
 	user := newUser(email, password)
 
+	if err = user.hashPassword(); err != nil {
+		return
+	}
+
 	if id, err = u.c.New(&user); err != nil {
 		return
 	}
