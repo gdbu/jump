@@ -1,6 +1,6 @@
 package jump
 
-import "gitlab.com/itsMontoya/permissions"
+import "github.com/Hatch1fy/jump/permissions"
 
 // SetPermission will give permissions to a provided group for a resourceKey
 // Note: See NewResourceKey for more context

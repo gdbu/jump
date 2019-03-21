@@ -40,10 +40,10 @@ func (j *Jump) GetUser(userID string) (user *users.User, err error) {
 
 // UpdateEmail will update a user's email address
 func (j *Jump) UpdateEmail(userID, newEmail string) (err error) {
-	return j.usrs.ChangeEmail(userID, newEmail)
+	return j.usrs.UpdateEmail(userID, newEmail)
 }
 
 // UpdatePassword is the update password handler
 func (j *Jump) UpdatePassword(userID, newPassword string) (err error) {
-	return j.usrs.ChangePassword(userID, newPassword)
+	return j.usrs.UpdatePassword(userID, newPassword)
 }
