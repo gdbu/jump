@@ -198,7 +198,7 @@ func (u *Users) Match(id, password string) (email string, err error) {
 func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	var orig *User
 	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
-		orig, err = u.getByEmail(txn, id)
+		orig, err = u.getByEmail(txn, email)
 		return
 	}); err != nil {
 		return
