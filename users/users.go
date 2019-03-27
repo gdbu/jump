@@ -44,7 +44,7 @@ type Users struct {
 
 func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *User, err error) {
 	var usr User
-	if err = u.c.Get(id, &usr); err != nil {
+	if err = fn(id, &usr); err != nil {
 		return
 	}
 
