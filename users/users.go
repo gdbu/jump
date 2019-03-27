@@ -48,8 +48,6 @@ func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *U
 		return
 	}
 
-	// Clear password
-	usr.Password = ""
 	user = &usr
 	return
 }
@@ -57,7 +55,7 @@ func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *U
 // getByEmail will return the matching user for the provided email
 func (u *Users) getByEmail(txn *core.Transaction, email string) (user *User, err error) {
 	var ids []string
-	if ids, err = u.c.GetLookup(lookupEmails, email); err != nil {
+	if ids, err = txn.GetLookup(lookupEmails, email); err != nil {
 		return
 	}
 
@@ -68,7 +66,7 @@ func (u *Users) getByEmail(txn *core.Transaction, email string) (user *User, err
 
 	id := ids[0]
 
-	return u.getWithFn(id, u.c.Get)
+	return u.getWithFn(id, txn.Get)
 }
 
 // edit will edit the user which matches the ID
@@ -135,13 +133,23 @@ func (u *Users) New(email, password string) (id string, err error) {
 
 // Get will get the user which matches the ID
 func (u *Users) Get(id string) (user *User, err error) {
-	return u.getWithFn(id, u.c.Get)
+	if user, err = u.getWithFn(id, u.c.Get); err != nil {
+		return
+	}
+
+	// Clear password
+	user.Password = ""
+	return
 }
 
 // ForEach will iterate through all users in the database
 func (u *Users) ForEach(fn func(*User) error) (err error) {
 	err = u.c.ForEach(func(userID string, val core.Value) (err error) {
 		user := val.(*User)
+
+		// Clear password
+		user.Password = ""
+
 		return fn(user)
 	})
 
