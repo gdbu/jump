@@ -142,6 +142,23 @@ func (u *Users) Get(id string) (user *User, err error) {
 	return
 }
 
+// GetByEmail will get the user which matches the e,ail
+func (u *Users) GetByEmail(email string) (user *User, err error) {
+	if err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+		if user, err = u.getByEmail(txn, email); err != nil {
+			return
+		}
+
+		return
+	}); err != nil {
+		return
+	}
+
+	// Clear password
+	user.Password = ""
+	return
+}
+
 // ForEach will iterate through all users in the database
 func (u *Users) ForEach(fn func(*User) error) (err error) {
 	err = u.c.ForEach(func(userID string, val core.Value) (err error) {
