@@ -99,6 +99,11 @@ func (j *Jump) Permissions() *permissions.Permissions {
 	return j.perm
 }
 
+// Users will return the underlying users
+func (j *Jump) Users() *users.Users {
+	return j.usrs
+}
+
 // Close will close jump
 func (j *Jump) Close() (err error) {
 	var errs errors.ErrorList
