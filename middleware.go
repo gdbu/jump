@@ -86,7 +86,6 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Ha
 			resourceID = resourceName
 		}
 
-		fmt.Println("Resource id", resourceID)
 		if !j.perm.Can(userID, resourceID, action) {
 			return httpserve.NewJSONResponse(401, errors.Error("forbidden"))
 		}
