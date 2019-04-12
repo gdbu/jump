@@ -38,9 +38,13 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Conte
 		)
 
 		if apiKey := getAPIKey(ctx); len(apiKey) > 0 {
-			userID, err = j.getUserIDFromAPIKey(apiKey)
+			if userID, err = j.getUserIDFromAPIKey(apiKey); err != nil {
+				err = fmt.Errorf("error getting user ID from API key: %v", err)
+			}
 		} else {
-			userID, err = j.getUserIDFromSession(ctx.Request)
+			if userID, err = j.getUserIDFromSession(ctx.Request); err != nil {
+				err = fmt.Errorf("error getting user ID from session key: %v", err)
+			}
 		}
 
 		if err != nil {
