@@ -24,8 +24,8 @@ func Login(ctx *httpserve.Context) (res httpserve.Response) {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
-	keyC := setCookie(ctx.Request.URL.Host, jump.CookieKey, key)
-	tokenC := setCookie(ctx.Request.URL.Host, jump.CookieToken, token)
+	keyC := setCookie(ctx.Request.Host, jump.CookieKey, key)
+	tokenC := setCookie(ctx.Request.Host, jump.CookieToken, token)
 
 	http.SetCookie(ctx.Writer, &keyC)
 	http.SetCookie(ctx.Writer, &tokenC)
