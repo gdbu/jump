@@ -49,7 +49,7 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Conte
 
 		if err != nil {
 			if !redirectOnFail {
-				return httpserve.NewJSONResponse(400, err)
+				return httpserve.NewJSONResponse(401, err)
 			}
 
 			return httpserve.NewRedirectResponse(302, "/login")
@@ -65,7 +65,7 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Ha
 	return func(ctx *httpserve.Context) (res httpserve.Response) {
 		userID := ctx.Get("userID")
 		if len(userID) == 0 {
-			return httpserve.NewJSONResponse(500, errors.Error("cannot assert permissions, userID is empty"))
+			return httpserve.NewJSONResponse(401, errors.Error("cannot assert permissions, user ID is empty"))
 		}
 
 		var action permissions.Action
