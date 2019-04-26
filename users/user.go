@@ -81,6 +81,7 @@ func (u *User) GetUpdatedAt() (updatedAt int64) {
 
 // GetRelationshipIDs will get the associated relationship IDs
 func (u *User) GetRelationshipIDs() (ids []string) {
+	ids = append(ids, u.Email)
 	return
 }
 

@@ -23,13 +23,15 @@ const (
 )
 
 const (
-	lookupEmails = "emails"
+	relationshipEmails = "emails"
 )
+
+var relationships = []string{relationshipEmails}
 
 // New will return a new instance of users
 func New(dir string) (up *Users, err error) {
 	var u Users
-	if u.c, err = core.New("users", dir, &User{}); err != nil {
+	if u.c, err = core.New("users", dir, &User{}, relationships...); err != nil {
 		return
 	}
 
@@ -53,20 +55,14 @@ func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *U
 }
 
 // getByEmail will return the matching user for the provided email
-func (u *Users) getByEmail(txn *core.Transaction, email string) (user *User, err error) {
-	var ids []string
-	if ids, err = txn.GetLookup(lookupEmails, email); err != nil {
+func (u *Users) getByEmail(txn *core.Transaction, email string) (up *User, err error) {
+	var user User
+	if err = txn.GetFirstByRelationship(relationshipEmails, email, &user); err != nil {
 		return
 	}
 
-	if len(ids) == 0 {
-		err = ErrUserNotFound
-		return
-	}
-
-	id := ids[0]
-
-	return u.getWithFn(id, txn.Get)
+	up = &user
+	return
 }
 
 // edit will edit the user which matches the ID
@@ -120,11 +116,6 @@ func (u *Users) New(email, password string) (id string, err error) {
 	}
 
 	if id, err = u.c.New(&user); err != nil {
-		return
-	}
-
-	if err = u.c.SetLookup(lookupEmails, email, id); err != nil {
-		id = ""
 		return
 	}
 
