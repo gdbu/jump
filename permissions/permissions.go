@@ -135,6 +135,21 @@ func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) 
 	return
 }
 
+// SetMultiPermissions will set the permissions for a resource key being accessed by given group
+func (p *Permissions) SetMultiPermissions(resourceKey string, pairs ...Pair) (err error) {
+	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+		for _, pair := range pairs {
+			if err = p.setPermissions(txn, resourceKey, pair.Group, pair.Actions); err != nil {
+				return
+			}
+		}
+
+		return
+	})
+
+	return
+}
+
 // UnsetPermissions will remove the permissions for a resource key being accessed by given group
 func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
 	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
@@ -227,4 +242,17 @@ func (p *Permissions) Transaction(fn func(*Transaction) error) (err error) {
 // Close will close permissions
 func (p *Permissions) Close() (err error) {
 	return p.c.Close()
+}
+
+// NewPair will return a new permissions pair
+func NewPair(group string, actions Action) (p Pair) {
+	p.Group = group
+	p.Actions = actions
+	return
+}
+
+// Pair represents a permissions pair
+type Pair struct {
+	Group   string
+	Actions Action
 }

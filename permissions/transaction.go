@@ -36,6 +36,17 @@ func (t *Transaction) SetPermissions(resourceKey, group string, actions Action) 
 	return t.p.setPermissions(t.txn, resourceKey, group, actions)
 }
 
+// SetMultiPermissions will set the permissions for a resource key being accessed by given group
+func (t *Transaction) SetMultiPermissions(resourceKey string, pairs ...Pair) (err error) {
+	for _, pair := range pairs {
+		if err = t.p.setPermissions(t.txn, resourceKey, pair.Group, pair.Actions); err != nil {
+			return
+		}
+	}
+
+	return
+}
+
 // UnsetPermissions will remove the permissions for a resource key being accessed by given group
 func (t *Transaction) UnsetPermissions(resourceKey, group string) (err error) {
 	return t.p.unsetPermissions(t.txn, resourceKey, group)
