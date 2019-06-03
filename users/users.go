@@ -44,6 +44,16 @@ type Users struct {
 	c *core.Core
 }
 
+func (u *Users) new(txn *core.Transaction, user *User) (entryID string, err error) {
+	if _, err = u.getByEmail(txn, user.Email); err == nil {
+		err = ErrEmailExists
+		return
+	}
+
+	entryID, err = txn.New(user)
+	return
+}
+
 func (u *Users) getWithFn(id string, fn func(string, core.Value) error) (user *User, err error) {
 	var usr User
 	if err = fn(id, &usr); err != nil {
@@ -103,7 +113,7 @@ func (u *Users) updatePassword(txn *core.Transaction, id, password string) (err 
 }
 
 // New will create a new user
-func (u *Users) New(email, password string) (id string, err error) {
+func (u *Users) New(email, password string) (entryID string, err error) {
 	if len(email) == 0 {
 		err = ErrInvalidEmail
 		return
@@ -115,9 +125,10 @@ func (u *Users) New(email, password string) (id string, err error) {
 		return
 	}
 
-	if id, err = u.c.New(&user); err != nil {
+	err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+		entryID, err = u.new(txn, &user)
 		return
-	}
+	})
 
 	return
 }
