@@ -1,6 +1,8 @@
 package users
 
 import (
+	"strings"
+
 	"github.com/Hatch1fy/errors"
 	core "github.com/Hatch1fy/service-core"
 )
@@ -120,6 +122,7 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 	}
 
 	user := newUser(email, password)
+	user.sanitize()
 
 	if err = user.hashPassword(); err != nil {
 		return
@@ -180,6 +183,9 @@ func (u *Users) UpdateEmail(id, email string) (err error) {
 	if len(email) == 0 {
 		return ErrInvalidEmail
 	}
+
+	// Convert to lowercase
+	email = strings.ToLower(email)
 
 	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
 		return u.updateEmail(txn, id, email)

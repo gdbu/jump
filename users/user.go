@@ -1,6 +1,8 @@
 package users
 
 import (
+	"strings"
+
 	"github.com/Hatch1fy/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,6 +22,10 @@ type User struct {
 
 	CreatedAt int64 `json:"createdAt"`
 	UpdatedAt int64 `json:"updatedAt"`
+}
+
+func (u *User) sanitize() {
+	u.Email = strings.ToLower(u.Email)
 }
 
 // IsMatch returns if a provided password is a match for a user
