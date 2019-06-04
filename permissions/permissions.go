@@ -159,6 +159,21 @@ func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
 	return
 }
 
+// UnsetMultiPermissions will remove the permissions for a resource key being accessed set of groups
+func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string) (err error) {
+	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+		for _, group := range groups {
+			if err = p.unsetPermissions(txn, resourceKey, group); err != nil {
+				return
+			}
+		}
+
+		return
+	})
+
+	return
+}
+
 // AddGroup will add a group to a userID
 func (p *Permissions) AddGroup(userID string, groups ...string) (err error) {
 	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
