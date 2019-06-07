@@ -136,6 +136,25 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 	return
 }
 
+// Insert will insert an existing user
+// Note: No password hashing will occur
+func (u *Users) Insert(email, password string) (entryID string, err error) {
+	if len(email) == 0 {
+		err = ErrInvalidEmail
+		return
+	}
+
+	user := newUser(email, password)
+	user.sanitize()
+
+	err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+		entryID, err = u.new(txn, &user)
+		return
+	})
+
+	return
+}
+
 // Get will get the user which matches the ID
 func (u *Users) Get(id string) (user *User, err error) {
 	if user, err = u.getWithFn(id, u.c.Get); err != nil {

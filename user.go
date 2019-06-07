@@ -4,13 +4,7 @@ import (
 	"github.com/Hatch1fy/jump/users"
 )
 
-// CreateUser will create a user and assign it's basic groups
-// Note: It is advised that this function is used when creating users rather than directly calling j.Users().New()
-func (j *Jump) CreateUser(email, password string, groups ...string) (userID, apiKey string, err error) {
-	if userID, err = j.usrs.New(email, password); err != nil {
-		return
-	}
-
+func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey string, err error) {
 	// Ensure first group is the user group
 	groups = append([]string{userID}, groups...)
 
@@ -30,6 +24,27 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 		return
 	}
 
+	return
+}
+
+// CreateUser will create a user and assign it's basic groups
+// Note: It is advised that this function is used when creating users rather than directly calling j.Users().New()
+func (j *Jump) CreateUser(email, password string, groups ...string) (userID, apiKey string, err error) {
+	if userID, err = j.usrs.New(email, password); err != nil {
+		return
+	}
+
+	apiKey, err = j.postUserCreateActions(userID, groups)
+	return
+}
+
+// InsertUser will insert an existing user (no password hashing)
+func (j *Jump) InsertUser(email, password string, groups ...string) (userID, apiKey string, err error) {
+	if userID, err = j.usrs.Insert(email, password); err != nil {
+		return
+	}
+
+	apiKey, err = j.postUserCreateActions(userID, groups)
 	return
 }
 
