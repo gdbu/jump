@@ -8,8 +8,6 @@ import (
 const (
 	// ErrInvalidActions is returned when an invalid permissions value is attempted to be set
 	ErrInvalidActions = errors.Error("invalid permissions, please see constant block for reference")
-	// ErrPermissionsUnchanged is returned when matching permissions are set for a resource
-	ErrPermissionsUnchanged = errors.Error("permissions match, unchanged")
 	// ErrResourceNotFound is returned when a requested resource cannot be found
 	ErrResourceNotFound = errors.Error("resource not found")
 	// ErrGroupNotFound is returned when a requested group cannot be found
@@ -47,7 +45,7 @@ func (p *Permissions) setPermissions(txn *core.Transaction, resourceKey, group s
 	}
 
 	if !r.Set(group, actions) {
-		return ErrPermissionsUnchanged
+		return
 	}
 
 	return txn.Edit(r.ID, r)
@@ -60,7 +58,7 @@ func (p *Permissions) unsetPermissions(txn *core.Transaction, resourceKey, group
 	}
 
 	if !r.Remove(group) {
-		return ErrPermissionsUnchanged
+		return
 	}
 
 	return txn.Edit(r.ID, r)
@@ -86,7 +84,7 @@ func (p *Permissions) addGroup(txn *core.Transaction, userID string, groups []st
 	}
 
 	if !updated {
-		return ErrPermissionsUnchanged
+		return
 	}
 
 	return
@@ -103,7 +101,7 @@ func (p *Permissions) removeGroup(txn *core.Transaction, userID string, groups [
 	}
 
 	if !updated {
-		return ErrPermissionsUnchanged
+		return
 	}
 
 	return
