@@ -231,6 +231,26 @@ func (p *Permissions) Groups(userID string) (groups []string, err error) {
 	return p.c.GetLookup(lookupGroups, userID)
 }
 
+// HasGroup will return if a user belongs to a given group
+func (p *Permissions) HasGroup(userID, group string) (has bool) {
+	var (
+		groups []string
+		err    error
+	)
+
+	if groups, err = p.c.GetLookup(lookupGroups, userID); err != nil {
+		return
+	}
+
+	for _, g := range groups {
+		if g == group {
+			return true
+		}
+	}
+
+	return false
+}
+
 // RemoveResource will remove a resource by key
 func (p *Permissions) RemoveResource(resourceKey string) (err error) {
 	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
