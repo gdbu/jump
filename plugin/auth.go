@@ -3,9 +3,16 @@ package main
 import (
 	"net/http"
 
+	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
 	"github.com/Hatch1fy/jump"
 	"github.com/Hatch1fy/jump/users"
+	core "github.com/Hatch1fy/service-core"
+)
+
+const (
+	// ErrNoLoginFound is returned when an email address is provided that is not found within the system
+	ErrNoLoginFound = errors.Error("no login was found for the provided email address")
 )
 
 // Login is the login handler
@@ -21,6 +28,10 @@ func Login(ctx *httpserve.Context) (res httpserve.Response) {
 
 	var key, token string
 	if key, token, err = p.jump.Login(user.Email, user.Password); err != nil {
+		if err == core.ErrEntryNotFound {
+			err = ErrNoLoginFound
+		}
+
 		return httpserve.NewJSONResponse(400, err)
 	}
 
