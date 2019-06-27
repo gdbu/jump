@@ -8,7 +8,7 @@ import (
 )
 
 func newUser(email, password string) (u User) {
-	u.Email = email
+	u.Email = strings.ToLower(email)
 	u.Password = password
 	return
 }

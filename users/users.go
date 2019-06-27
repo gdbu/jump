@@ -249,6 +249,8 @@ func (u *Users) Match(id, password string) (email string, err error) {
 // MatchEmail will return the matching user id for the provided email and password
 func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	var orig *User
+	// Ensure the comparing email is all lower case
+	email = strings.ToLower(email)
 	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
 		orig, err = u.getByEmail(txn, email)
 		return
