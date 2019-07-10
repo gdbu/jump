@@ -35,7 +35,7 @@ func UpdateEmail(ctx *httpserve.Context) (res httpserve.Response) {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
-	userID := ctx.Get("userID")
+	userID := ctx.Param("userID")
 
 	if err = p.jump.UpdateEmail(userID, user.Email); err != nil {
 		return httpserve.NewJSONResponse(400, err)
