@@ -17,7 +17,7 @@ const (
 	// ErrUserNotFound is returned when a user was not found
 	ErrUserNotFound = errors.Error("user not found")
 	// ErrInvalidCredentials is returned when a non-matching email/password combo was provided
-	ErrInvalidCredentials = errors.Error("invalid credentials")
+	ErrInvalidCredentials = errors.Error("invalid password")
 	// ErrEmailExists is returned when a user is attempting to be created with an email already in use
 	ErrEmailExists = errors.Error("email is already associated with a user")
 
