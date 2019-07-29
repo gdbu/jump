@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Hatch1fy/errors"
@@ -18,16 +19,16 @@ const (
 // Login is the login handler
 func Login(ctx *httpserve.Context) (res httpserve.Response) {
 	var (
-		user users.User
-		err  error
+		login users.User
+		err   error
 	)
 
-	if err = ctx.BindJSON(&user); err != nil {
+	if err = ctx.BindJSON(&login); err != nil {
 		return httpserve.NewJSONResponse(400, err)
 	}
 
 	var key, token string
-	if key, token, err = p.jump.Login(user.Email, user.Password); err != nil {
+	if login.ID, key, token, err = p.jump.Login(login.Email, login.Password); err != nil {
 		if err == core.ErrEntryNotFound {
 			err = ErrNoLoginFound
 		}
@@ -40,7 +41,14 @@ func Login(ctx *httpserve.Context) (res httpserve.Response) {
 
 	http.SetCookie(ctx.Writer, &keyC)
 	http.SetCookie(ctx.Writer, &tokenC)
-	return httpserve.NewNoContentResponse()
+
+	var user *users.User
+	if user, err = p.jump.GetUser(login.ID); err != nil {
+		err = fmt.Errorf("error getting user %s: %v", login.ID, err)
+		return httpserve.NewJSONResponse(400, err)
+	}
+
+	return httpserve.NewJSONResponse(200, user)
 }
 
 // Logout is the logout handler
