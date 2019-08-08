@@ -102,3 +102,8 @@ func (t *Transaction) Has(resourceID, group string) (ok bool) {
 func (t *Transaction) Groups(userID string) (groups []string, err error) {
 	return t.txn.GetLookup(lookupGroups, userID)
 }
+
+// RemoveResource will remove a resource by key
+func (t *Transaction) RemoveResource(resourceKey string) (err error) {
+	return t.p.removeResource(t.txn, resourceKey)
+}
