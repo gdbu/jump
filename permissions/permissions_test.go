@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hatchify/errors"
+	"github.com/Hatch1fy/errors"
 )
 
 const (
