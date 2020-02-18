@@ -8,7 +8,7 @@ import (
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/jump"
 
-	"github.com/missionMeteora/journaler"
+	"github.com/hatchify/scribe"
 )
 
 const (
@@ -37,7 +37,7 @@ var p plugin
 func init() {
 	var err error
 	dir := "./data"
-	p.out = journaler.New("Auth")
+	p.out = scribe.NewWithWrtier(scribe.Writer, "Auth")
 	if p.jump, err = jump.New(dir); err != nil {
 		log.Fatalf("error initializing jump: %v", err)
 	}
@@ -48,7 +48,7 @@ func init() {
 }
 
 type plugin struct {
-	out  *journaler.Journaler
+	out  *scribe.Scribe
 	jump *jump.Jump
 }
 

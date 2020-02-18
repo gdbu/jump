@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/missionMeteora/journaler"
+	"github.com/hatchify/scribe"
 
 	"github.com/Hatch1fy/errors"
 
@@ -38,7 +38,7 @@ const (
 // New will return a new instance of Jump
 func New(dir string) (jp *Jump, err error) {
 	var j Jump
-	j.out = journaler.New("Jump")
+	j.out = scribe.New("Jump")
 	if j.perm, err = permissions.New(dir); err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func New(dir string) (jp *Jump, err error) {
 
 // Jump manages the basic ancillary components of a web service
 type Jump struct {
-	out *journaler.Journaler
+	out *scribe.Scribe
 
 	perm *permissions.Permissions
 	sess *sessions.Sessions

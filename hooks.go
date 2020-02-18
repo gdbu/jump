@@ -13,7 +13,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 
 		var resourceID string
 		if resourceID = storage["resourceID"]; len(resourceID) == 0 {
-			j.out.Error("Error setting permissions: %v", ErrResourceIDIsEmpty)
+			j.out.Errorf("Error setting permissions: %v", ErrResourceIDIsEmpty)
 			return
 		}
 
@@ -22,7 +22,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 
 		var err error
 		if err = j.SetPermission(resourceKey, userID, actions, adminActions); err != nil {
-			j.out.Error("Error setting permissons for %s / %s: %v", userID, resourceName, err)
+			j.out.Errorf("Error setting permissons for %s / %s: %v", userID, resourceName, err)
 		}
 
 		return

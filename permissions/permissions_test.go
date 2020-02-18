@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/missionMeteora/toolkit/errors"
+	"github.com/hatchify/errors"
 )
 
 const (

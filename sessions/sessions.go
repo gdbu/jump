@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/Hatch1fy/errors"
+	"github.com/Hatch1fy/uuid"
 	core "github.com/Hatch1fy/service-core"
 	"github.com/boltdb/bolt"
-	"github.com/missionMeteora/journaler"
-	"github.com/missionMeteora/uuid"
+	"github.com/hatchify/scribe"
 )
 
 const (
@@ -40,8 +40,7 @@ func New(dir string) (sp *Sessions, err error) {
 		return
 	}
 
-	s.g = uuid.NewGen()
-	s.out = journaler.New("Sessions")
+	s.out = scribe.New("Sessions")
 
 	// Start purge loop
 	go s.loop()
@@ -51,16 +50,18 @@ func New(dir string) (sp *Sessions, err error) {
 
 // Sessions manages sessions
 type Sessions struct {
-	out *journaler.Journaler
+	out *scribe.Scribe
 	c   *core.Core
-	g   *uuid.Gen
 }
 
 func (s *Sessions) newKeyToken() (key, token string) {
 	// Set key
-	key = s.g.New().String()
+        var id = uuid.New()
+	key = id.String()
+
 	// Set token
-	token = s.g.New().String()
+        id = uuid.New()
+	token = id.String()
 	return
 }
 
@@ -94,7 +95,7 @@ func (s *Sessions) loop() {
 				return
 			}
 
-			s.out.Error("error purging: %v", err)
+			s.out.Errorf("error purging: %v", err)
 		}
 
 		time.Sleep(time.Minute)

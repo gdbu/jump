@@ -19,7 +19,7 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 		)
 
 		if userID, err = getUserID(ctx); err != nil {
-			j.out.Error("Error getting user id while setting permissions: %v", err)
+			j.out.Errorf("Error getting user id while setting permissions: %v", err)
 			return
 		}
 
