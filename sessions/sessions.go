@@ -41,6 +41,7 @@ func New(dir string) (sp *Sessions, err error) {
 	}
 
 	s.out = scribe.New("Sessions")
+        s.g = uuid.NewGenerator()
 
 	// Start purge loop
 	go s.loop()
@@ -52,15 +53,16 @@ func New(dir string) (sp *Sessions, err error) {
 type Sessions struct {
 	out *scribe.Scribe
 	c   *core.Core
+        g   *uuid.Generator
 }
 
 func (s *Sessions) newKeyToken() (key, token string) {
 	// Set key
-        var id = uuid.New()
+        var id = s.g.New()
 	key = id.String()
 
 	// Set token
-        id = uuid.New()
+        id = s.g.New()
 	token = id.String()
 	return
 }
