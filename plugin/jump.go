@@ -37,7 +37,7 @@ var p plugin
 func init() {
 	var err error
 	dir := "./data"
-	p.out = scribe.NewWithWrtier(scribe.Writer, "Auth")
+	p.out = scribe.New("Auth")
 	if p.jump, err = jump.New(dir); err != nil {
 		log.Fatalf("error initializing jump: %v", err)
 	}
@@ -69,7 +69,7 @@ func (p *plugin) seed() (err error) {
 		return
 	}
 
-	p.out.Success("Successfully created admin with api key of: %s", apiKey)
+	p.out.Successf("Successfully created admin with api key of: %s", apiKey)
 	return
 
 }
