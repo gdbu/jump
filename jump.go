@@ -8,7 +8,7 @@ import (
 
 	"github.com/Hatch1fy/errors"
 
-	"github.com/Hatch1fy/jump/apikeys"
+	"github.com/Hatch1fy/apikeys"
 	"github.com/Hatch1fy/jump/permissions"
 	"github.com/Hatch1fy/jump/sessions"
 	"github.com/Hatch1fy/jump/users"

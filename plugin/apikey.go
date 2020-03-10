@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Hatch1fy/httpserve"
-	"github.com/Hatch1fy/jump/apikeys"
+	"github.com/Hatch1fy/apikeys"
 )
 
 // GetAPIKeysByUser is the handler for retrieving the api keys for a user
