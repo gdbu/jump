@@ -251,7 +251,7 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	var orig *User
 	// Ensure the comparing email is all lower case
 	email = strings.ToLower(email)
-	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+	if err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
 		orig, err = u.getByEmail(txn, email)
 		return
 	}); err != nil {
