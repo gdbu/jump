@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/Hatch1fy/errors"
-	"github.com/Hatch1fy/uuid"
 	core "github.com/Hatch1fy/service-core"
+	"github.com/Hatch1fy/uuid"
 	"github.com/boltdb/bolt"
 	"github.com/hatchify/scribe"
 )
@@ -41,7 +41,7 @@ func New(dir string) (sp *Sessions, err error) {
 	}
 
 	s.out = scribe.New("Sessions")
-        s.g = uuid.NewGenerator()
+	s.g = uuid.NewGenerator()
 
 	// Start purge loop
 	go s.loop()
@@ -53,16 +53,16 @@ func New(dir string) (sp *Sessions, err error) {
 type Sessions struct {
 	out *scribe.Scribe
 	c   *core.Core
-        g   *uuid.Generator
+	g   *uuid.Generator
 }
 
 func (s *Sessions) newKeyToken() (key, token string) {
 	// Set key
-        var id = s.g.New()
+	var id = s.g.New()
 	key = id.String()
 
 	// Set token
-        id = s.g.New()
+	id = s.g.New()
 	token = id.String()
 	return
 }
@@ -134,7 +134,10 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 	// Create new session
 	session := s.newSession(key, token, userID)
 
-	if _, err = s.c.New(&session); err != nil {
+	if err = s.c.Batch(func(txn *core.Transaction) (err error) {
+		_, err = s.c.New(&session)
+		return
+	}); err != nil {
 		key = ""
 		token = ""
 		return

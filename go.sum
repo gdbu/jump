@@ -18,6 +18,8 @@ github.com/Hatch1fy/pgutils v0.3.0 h1:jLgU9MqZhVECCZpCNr/89F6lTdN93IE6sIM6XqcllC
 github.com/Hatch1fy/pgutils v0.3.0/go.mod h1:eATbgMrxlnFUEftwYorGR4/BAWbr1fH5xkVVqpu4YnA=
 github.com/Hatch1fy/service-core v0.3.0 h1:HIdY1pOcynhNUnQkHf49qsIenZs7jYqI6xBb2oR2U7s=
 github.com/Hatch1fy/service-core v0.3.0/go.mod h1:Cs3oU60rfJt4queR7OAHvRCJ5XAIUKimjCsTl1DstaE=
+github.com/Hatch1fy/service-core v0.3.1 h1:9ftYsPKTs/i/+57aeIQ9iUlvZ4Rx0dKOYuwTLDXsgi0=
+github.com/Hatch1fy/service-core v0.3.1/go.mod h1:Cs3oU60rfJt4queR7OAHvRCJ5XAIUKimjCsTl1DstaE=
 github.com/Hatch1fy/snapshotter v0.3.0 h1:qipFfFdrB3dxk9L2lzDJXTLP1uLVY9iRe6XBvrrGlfE=
 github.com/Hatch1fy/snapshotter v0.3.0/go.mod h1:kiGe1/84BvYSmtaRG8GXVkfBY4wChidqbs0DBPRcBOM=
 github.com/Hatch1fy/uuid v0.3.0 h1:VY9FNuaQZUHadHdBmBQ0G1g/OvynGPPRxVPixKPu10Y=
