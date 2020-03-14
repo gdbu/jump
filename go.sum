@@ -2,8 +2,8 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Hatch1fy/actions v0.3.0 h1:dcVheptG6yLBwGhrNRpSt+oBf1A2EcOe646QuXcp7Tc=
 github.com/Hatch1fy/actions v0.3.0/go.mod h1:LZ+j84tKpVuFRXxw/gQjTEHGVVmj2apjPTIfl/hgJF8=
-github.com/Hatch1fy/apikeys v0.3.1 h1:QcdHNa/w+L7TVOY04e0XA0AQAHJwnlhOKtcw2mN7Zoc=
-github.com/Hatch1fy/apikeys v0.3.1/go.mod h1:B0BeOl4V4vEtyih8W8ODtsv6s5MHNO5/TDy1uBWG2l8=
+github.com/Hatch1fy/apikeys v0.3.3 h1:yMSTViJ2Yo/hxyEeYsaxnleiWHlK2Ghai61PLTMKXlc=
+github.com/Hatch1fy/apikeys v0.3.3/go.mod h1:/Bj07ocGVDnY4CUw/vb+GhPH1A2yF6hVeZNS0nkgAEk=
 github.com/Hatch1fy/cron v0.3.0 h1:WLoEbsXoz/sK9h/90AK1kRYjn88k/1F488/1G/q9hXU=
 github.com/Hatch1fy/cron v0.3.0/go.mod h1:srziZhU5rAzVXoUSkVkzq3iZOk+u+Y7pV3nL+dXN9L4=
 github.com/Hatch1fy/dbutils v0.3.0 h1:GVp66nEh4ErxEJBK4reRrDHiUu6AVjlIy0Q3iRSWgAI=
@@ -16,8 +16,8 @@ github.com/Hatch1fy/logger v0.3.0 h1:vtOHKt/GRaCH0nZYsfP/JTu6Sa1VDCsNqoo3czHlxZ4
 github.com/Hatch1fy/logger v0.3.0/go.mod h1:DPCaZtuxSMHS+dfPQq3TUkHOT060H/zUkkMTFFvo3ZU=
 github.com/Hatch1fy/pgutils v0.3.0 h1:jLgU9MqZhVECCZpCNr/89F6lTdN93IE6sIM6XqcllCA=
 github.com/Hatch1fy/pgutils v0.3.0/go.mod h1:eATbgMrxlnFUEftwYorGR4/BAWbr1fH5xkVVqpu4YnA=
-github.com/Hatch1fy/service-core v0.3.1 h1:9ftYsPKTs/i/+57aeIQ9iUlvZ4Rx0dKOYuwTLDXsgi0=
-github.com/Hatch1fy/service-core v0.3.1/go.mod h1:Cs3oU60rfJt4queR7OAHvRCJ5XAIUKimjCsTl1DstaE=
+github.com/Hatch1fy/service-core v0.3.2 h1:U5VtDsiCdXOl72si57iCjlOtagvgjmT0GtaytHkzx4M=
+github.com/Hatch1fy/service-core v0.3.2/go.mod h1:Cs3oU60rfJt4queR7OAHvRCJ5XAIUKimjCsTl1DstaE=
 github.com/Hatch1fy/snapshotter v0.3.0 h1:qipFfFdrB3dxk9L2lzDJXTLP1uLVY9iRe6XBvrrGlfE=
 github.com/Hatch1fy/snapshotter v0.3.0/go.mod h1:kiGe1/84BvYSmtaRG8GXVkfBY4wChidqbs0DBPRcBOM=
 github.com/Hatch1fy/uuid v0.3.0 h1:VY9FNuaQZUHadHdBmBQ0G1g/OvynGPPRxVPixKPu10Y=
