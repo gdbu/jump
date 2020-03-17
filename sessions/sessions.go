@@ -135,7 +135,7 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 	session := s.newSession(key, token, userID)
 
 	if err = s.c.Batch(func(txn *core.Transaction) (err error) {
-		_, err = s.c.New(&session)
+		_, err = txn.New(&session)
 		return
 	}); err != nil {
 		key = ""
