@@ -150,7 +150,7 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 func (s *Sessions) Get(key, token string) (userID string, err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = s.c.Batch(func(txn *core.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
