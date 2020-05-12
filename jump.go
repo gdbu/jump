@@ -104,6 +104,11 @@ func (j *Jump) Users() *users.Users {
 	return j.usrs
 }
 
+// Sessions will return the underlying sessions
+func (j *Jump) Sessions() *sessions.Sessions {
+	return j.sess
+}
+
 // Close will close jump
 func (j *Jump) Close() (err error) {
 	var errs errors.ErrorList
