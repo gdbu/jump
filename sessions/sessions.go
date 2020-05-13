@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"sort"
 	"time"
 
 	"github.com/Hatch1fy/errors"
@@ -89,6 +90,19 @@ func (s *Sessions) getByKey(txn *core.Transaction, key string) (sp *Session, err
 	return
 }
 
+func (s *Sessions) getByUserID(txn *core.Transaction, userID string) (ss []*Session, err error) {
+	if err = txn.GetByRelationship(relationshipUsers, userID, &ss); err != nil {
+		return
+	}
+
+	sort.Slice(ss, func(i, j int) (less bool) {
+		// We are sorting descending, so we inverse the lookup
+		return ss[i].LastUsedAt > ss[j].LastUsedAt
+	})
+
+	return
+}
+
 func (s *Sessions) loop() {
 	for {
 		oldest := time.Now().Add(time.Second * -SessionTimeout).Unix()
@@ -161,6 +175,16 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 		// Set last action for session
 		sp.setAction()
 		return txn.Edit(sp.ID, sp)
+	})
+
+	return
+}
+
+// GetByUserID will retrieve all the sessions for a given user ID
+func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
+	err = s.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+		ss, err = s.getByUserID(txn, userID)
+		return
 	})
 
 	return
