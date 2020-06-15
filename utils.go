@@ -2,6 +2,8 @@ package jump
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
@@ -58,4 +60,21 @@ func getAPIKey(ctx *httpserve.Context) (apiKey string) {
 
 	apiKey = vals[0]
 	return
+}
+
+func newCookie(host, name, value string, expires time.Time) (c http.Cookie) {
+	c.Domain = host
+	c.Name = name
+	c.Value = value
+	c.Expires = expires
+	c.Path = "/"
+	return
+}
+
+func setCookie(host, name, value string) (c http.Cookie) {
+	return newCookie(host, name, value, time.Now().AddDate(1, 0, 0))
+}
+
+func unsetCookie(host, name, value string) (c http.Cookie) {
+	return newCookie(host, name, value, time.Now().AddDate(-1, 0, 0))
 }

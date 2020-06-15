@@ -1,13 +1,15 @@
 package jump
 
+import "github.com/Hatch1fy/httpserve"
+
 // Login will attempt to login with a provided email and password combo
 // If successful, a key/token pair will be returned to represent the session pair
-func (j *Jump) Login(email, password string) (userID, key, token string, err error) {
+func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID string, err error) {
 	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
 		return
 	}
 
-	key, token, err = j.NewSession(userID)
+	err = j.NewSession(ctx, userID)
 	return
 }
 
