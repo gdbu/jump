@@ -78,3 +78,13 @@ func setCookie(host, name, value string) (c http.Cookie) {
 func unsetCookie(host, name, value string) (c http.Cookie) {
 	return newCookie(host, name, value, time.Now().AddDate(-1, 0, 0))
 }
+
+func getCookieValue(req *http.Request, name string) (value string, err error) {
+	var c *http.Cookie
+	if c, err = req.Cookie(name); err != nil {
+		return
+	}
+
+	value = c.Value
+	return
+}
