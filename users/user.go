@@ -20,6 +20,8 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
 
+	Disabled bool `json:"disabled"`
+
 	CreatedAt int64 `json:"createdAt"`
 	UpdatedAt int64 `json:"updatedAt"`
 }
