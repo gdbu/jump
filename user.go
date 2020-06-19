@@ -62,3 +62,21 @@ func (j *Jump) UpdateEmail(userID, newEmail string) (err error) {
 func (j *Jump) UpdatePassword(userID, newPassword string) (err error) {
 	return j.usrs.UpdatePassword(userID, newPassword)
 }
+
+// EnableUser will enable a user
+func (j *Jump) EnableUser(userID string) (err error) {
+	if err = j.usrs.UpdateDisabled(userID, false); err != nil {
+		return
+	}
+
+	return
+}
+
+// DisableUser will disable a user
+func (j *Jump) DisableUser(userID string) (err error) {
+	if err = j.usrs.UpdateDisabled(userID, true); err != nil {
+		return
+	}
+
+	return j.sess.InvalidateUser(userID)
+}
