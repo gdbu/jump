@@ -132,6 +132,22 @@ func (s *Sessions) purge(txn *core.Transaction, oldest int64) (err error) {
 	return
 }
 
+// Remove will invalidate a provided key/token pair session
+func (s *Sessions) invalidateUser(txn *core.Transaction, userID string) (err error) {
+	var ss []*Session
+	if ss, err = s.getByUserID(txn, userID); err != nil {
+		return
+	}
+
+	for _, sess := range ss {
+		if err = txn.Remove(sess.ID); err != nil {
+			return
+		}
+	}
+
+	return
+}
+
 // Purge will purge all entries oldest than the oldest value
 func (s *Sessions) Purge(oldest int64) (err error) {
 	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
@@ -201,6 +217,15 @@ func (s *Sessions) Remove(key, token string) (err error) {
 		}
 
 		return txn.Remove(sp.ID)
+	})
+
+	return
+}
+
+// InvalidateUser will invalidate all sessions associated with a user
+func (s *Sessions) InvalidateUser(userID string) (err error) {
+	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+		return s.invalidateUser(txn, userID)
 	})
 
 	return
