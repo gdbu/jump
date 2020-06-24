@@ -37,11 +37,11 @@ var (
 // New will return a new instance of sessions
 func New(dir string) (sp *Sessions, err error) {
 	var s Sessions
+	s.out = scribe.New("Sessions")
 	if s.c, err = core.New("sessions", dir, &Session{}, relationships...); err != nil {
 		return
 	}
 
-	s.out = scribe.New("Sessions")
 	s.g = uuid.NewGenerator()
 
 	// Start purge loop
