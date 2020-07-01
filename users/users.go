@@ -20,6 +20,8 @@ const (
 	ErrInvalidCredentials = errors.Error("invalid password")
 	// ErrEmailExists is returned when a user is attempting to be created with an email already in use
 	ErrEmailExists = errors.Error("email is already associated with a user")
+	// ErrUserIsDisabled is returned when a user is disabled
+	ErrUserIsDisabled = errors.Error("user is disabled")
 
 	errBreak = errors.Error("jump break")
 )
@@ -111,6 +113,61 @@ func (u *Users) updatePassword(txn *core.Transaction, id, password string) (err 
 		return user.hashPassword()
 	})
 
+	return
+}
+
+func (u *Users) updateDisabled(txn *core.Transaction, id string, disabled bool) (err error) {
+	err = u.edit(txn, id, func(user *User) (err error) {
+		user.Disabled = disabled
+		return
+	})
+
+	return
+}
+
+// Match will return the matching email for the provided id and password
+func (u *Users) match(txn *core.Transaction, id, password string) (email string, err error) {
+	var match User
+	if err = txn.Get(id, &match); err != nil {
+		return
+	}
+
+	if !match.IsMatch(password) {
+		err = ErrInvalidCredentials
+		return
+	}
+
+	if match.Disabled {
+		err = ErrUserIsDisabled
+		return
+	}
+
+	email = match.Email
+	return
+}
+
+// MatchEmail will return the matching user id for the provided email and password
+func (u *Users) matchEmail(txn *core.Transaction, email, password string) (id string, err error) {
+	// Ensure the comparing email is all lower case
+	email = strings.ToLower(email)
+
+	var match *User
+	// Attempt to get match
+	if match, err = u.getByEmail(txn, email); err != nil {
+		return
+	}
+
+	if !match.IsMatch(password) {
+		err = ErrInvalidCredentials
+		return
+	}
+
+	if match.Disabled {
+		err = ErrUserIsDisabled
+		return
+	}
+
+	id = match.ID
 	return
 }
 
@@ -230,40 +287,34 @@ func (u *Users) UpdatePassword(id, password string) (err error) {
 	return
 }
 
+// UpdateDisabled will change the user's disabled state
+func (u *Users) UpdateDisabled(id string, disabled bool) (err error) {
+	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+		return u.updateDisabled(txn, id, disabled)
+	}); err != nil {
+		return
+	}
+
+	return
+}
+
 // Match will return the matching email for the provided id and password
 func (u *Users) Match(id, password string) (email string, err error) {
-	var orig User
-	if err = u.c.Get(id, &orig); err != nil {
+	err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+		email, err = u.match(txn, id, password)
 		return
-	}
+	})
 
-	if !orig.IsMatch(password) {
-		err = ErrInvalidCredentials
-		return
-	}
-
-	email = orig.Email
 	return
 }
 
 // MatchEmail will return the matching user id for the provided email and password
 func (u *Users) MatchEmail(email, password string) (id string, err error) {
-	var orig *User
-	// Ensure the comparing email is all lower case
-	email = strings.ToLower(email)
-	if err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
-		orig, err = u.getByEmail(txn, email)
+	err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+		email, err = u.matchEmail(txn, email, password)
 		return
-	}); err != nil {
-		return
-	}
+	})
 
-	if !orig.IsMatch(password) {
-		err = ErrInvalidCredentials
-		return
-	}
-
-	id = orig.ID
 	return
 }
 

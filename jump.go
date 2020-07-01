@@ -76,6 +76,17 @@ func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
 		return
 	}
 
+	var u *users.User
+	if u, err = j.usrs.Get(userID); err != nil {
+		err = fmt.Errorf("error getting user \"%s\": %v", userID, err)
+		return
+	}
+
+	if u.Disabled {
+		err = users.ErrUserIsDisabled
+		return
+	}
+
 	userID = a.UserID
 	return
 }
