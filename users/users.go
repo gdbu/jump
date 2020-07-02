@@ -311,7 +311,7 @@ func (u *Users) Match(id, password string) (email string, err error) {
 // MatchEmail will return the matching user id for the provided email and password
 func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
-		email, err = u.matchEmail(txn, email, password)
+		id, err = u.matchEmail(txn, email, password)
 		return
 	})
 
