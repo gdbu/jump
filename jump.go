@@ -77,7 +77,7 @@ func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
 	}
 
 	var u *users.User
-	if u, err = j.usrs.Get(userID); err != nil {
+	if u, err = j.usrs.Get(a.UserID); err != nil {
 		err = fmt.Errorf("error getting user \"%s\": %v", userID, err)
 		return
 	}
