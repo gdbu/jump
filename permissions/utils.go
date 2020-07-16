@@ -1,6 +1,6 @@
 package permissions
 
-import core "github.com/Hatch1fy/service-core"
+import core "github.com/gdbu/dbl"
 
 type source interface {
 	New(value core.Value) (resourceID string, err error)

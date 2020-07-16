@@ -1,6 +1,6 @@
 package permissions
 
-import core "github.com/Hatch1fy/service-core"
+import core "github.com/gdbu/dbl"
 
 func newTransaction(txn *core.Transaction, p *Permissions) (t Transaction) {
 	t.txn = txn

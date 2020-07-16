@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/Hatch1fy/errors"
-	core "github.com/Hatch1fy/service-core"
+	core "github.com/gdbu/dbl"
 )
 
 const (
