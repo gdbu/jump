@@ -2,8 +2,9 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Hatch1fy/apikeys v0.4.86 h1:PALcpfCnYMGJk/WA86p4y9JXbhIN/rOxmfrLGzayj44=
 github.com/Hatch1fy/apikeys v0.4.86/go.mod h1:s3pKfqmSHfYB3ZCGMovUUl6GSEeCoySf2o5o+1Ym28Y=
-github.com/Hatch1fy/cron v0.4.77 h1:VmORottzpTEA9gMITt0EUAaIupAYH4hMgXFAhz7APUY=
 github.com/Hatch1fy/cron v0.4.77/go.mod h1:qTM34B/bZEHUopeeyEIbvRGaZ9OcI0h5JfpLfI19rrU=
+github.com/Hatch1fy/cron v0.4.78 h1:aNdJfiFYfEPWprxEBHM9taHV6jwWjMo17OvQYnD8528=
+github.com/Hatch1fy/cron v0.4.78/go.mod h1:srziZhU5rAzVXoUSkVkzq3iZOk+u+Y7pV3nL+dXN9L4=
 github.com/Hatch1fy/errors v0.4.77/go.mod h1:LPnug0nWT7I99nYl62NfYjxNMCCEx3lBV5YWIco+H0w=
 github.com/Hatch1fy/errors v0.4.78 h1:Xd64lclmP6Gg5i9WFm0wJWkcmf/1rd82DavHTpLVLZs=
 github.com/Hatch1fy/errors v0.4.78/go.mod h1:SJFCeScmERvwtYMG7EU24Fe0KfXmiIs7tNlcIl0STKk=
@@ -37,8 +38,9 @@ github.com/hatchify/colors v0.4.77 h1:wPtYLLPbsekeamTZzu71rZVsbq8P2ues1YDx7OsKAx
 github.com/hatchify/colors v0.4.77/go.mod h1:AG6qII7bJEBO7WL28IACU62PqoavhEqpNFhfE/5Zyfk=
 github.com/hatchify/mum v0.4.78 h1:jizHyz3mSbAjwzrrjrFcH2lZ+GvlJjyqT0ZycPRUWZE=
 github.com/hatchify/mum v0.4.78/go.mod h1:X3QN1v0borhpEKIIsGuZpNJNadMporFqUceEa6WK/1Q=
-github.com/hatchify/scribe v0.4.78 h1:35wRjRJxRbj3NBGYg0/sPGpd0HfI8tWucKPFI0upAno=
 github.com/hatchify/scribe v0.4.78/go.mod h1:TLTVF/+b0yJtiVRZjW0XUMh4yVDikJZG2z3tkA+L2xM=
+github.com/hatchify/scribe v0.4.79 h1:vtm+hfqNUUEEwKfk+Z8z9fnZcqFjCFf0cAA8ZSYs8q4=
+github.com/hatchify/scribe v0.4.79/go.mod h1:Cdy81t7usC0+YCd9xRWP2zvK86z+v8T3OUuewKcERy8=
 github.com/hatchify/simply v0.0.17 h1:JZBt1K5+Gc+ZiOl96AEK9rNBF42tMMwEajltIbdXnbU=
 github.com/hatchify/simply v0.0.17/go.mod h1:Zt75bbQLhETkkPSie6LEtRr13bt0cy4YzQrUoOH+xbI=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
