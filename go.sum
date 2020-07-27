@@ -1,7 +1,5 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Hatch1fy/apikeys v0.4.89 h1:WL/JQbmAOQCFjkk0drgdNCJJCUPAEs8Qc4tIbJiI0mc=
-github.com/Hatch1fy/apikeys v0.4.89/go.mod h1:cwU36ay6hbS1uH7Qte85yswo7yg9lmUaL7D4fm/a1AM=
 github.com/Hatch1fy/cron v0.4.78 h1:aNdJfiFYfEPWprxEBHM9taHV6jwWjMo17OvQYnD8528=
 github.com/Hatch1fy/cron v0.4.78/go.mod h1:srziZhU5rAzVXoUSkVkzq3iZOk+u+Y7pV3nL+dXN9L4=
 github.com/Hatch1fy/errors v0.4.78 h1:Xd64lclmP6Gg5i9WFm0wJWkcmf/1rd82DavHTpLVLZs=
@@ -20,6 +18,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdbu/actions v0.5.2 h1:BAo+UekMHWCcuQccr2y9JmrFc7zGcdBZhPDDk0h3IsI=
 github.com/gdbu/actions v0.5.2/go.mod h1:9NbE1r9bSeA7wFFWZCpSIqyvunSIz84FmEK75bgnG+8=
+github.com/gdbu/apikeys v0.5.0 h1:u5VUTQlYqBpmlYS7Tc8hSR3uLg7VRFPLOwKm9SHLQ1s=
+github.com/gdbu/apikeys v0.5.0/go.mod h1:ZbCoDxvqzS5sbcI87tPEG/NRRSBYgls0RCtVVOV9vws=
 github.com/gdbu/dbl v0.5.3 h1:zlaJI1TKg422kdl7rytiXWemynqwFi1VvQcpPj8XrMg=
 github.com/gdbu/dbl v0.5.3/go.mod h1:V2gAjGe4uIjB/16Pc8VMLyUz3x0vhH8YKmftj8Q5yNw=
 github.com/gdbu/dbutils v0.5.0 h1:LBUTNLDm5Ba4J9voHMBQreRqT0xHaDZGzdWffo6lxF0=
