@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/Hatch1fy/errors"
-	"github.com/Hatch1fy/uuid"
 	"github.com/boltdb/bolt"
 	core "github.com/gdbu/dbl"
+	"github.com/gdbu/uuid"
 	"github.com/hatchify/scribe"
 )
 
