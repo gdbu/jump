@@ -5,7 +5,7 @@ import (
 
 	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
-	"github.com/Hatch1fy/jump/permissions"
+	"github.com/gdbu/jump/permissions"
 )
 
 // NewGrantPermissionsMW will create a new permissions middleware which will grant permissions to a new owner

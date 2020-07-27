@@ -2,7 +2,7 @@ package jump
 
 import (
 	"github.com/Hatch1fy/httpserve"
-	"github.com/Hatch1fy/jump/permissions"
+	"github.com/gdbu/jump/permissions"
 )
 
 func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {

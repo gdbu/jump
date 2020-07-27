@@ -9,9 +9,9 @@ import (
 	"github.com/Hatch1fy/errors"
 
 	"github.com/Hatch1fy/apikeys"
-	"github.com/Hatch1fy/jump/permissions"
-	"github.com/Hatch1fy/jump/sessions"
-	"github.com/Hatch1fy/jump/users"
+	"github.com/gdbu/jump/permissions"
+	"github.com/gdbu/jump/sessions"
+	"github.com/gdbu/jump/users"
 )
 
 const (

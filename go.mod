@@ -1,4 +1,4 @@
-module github.com/Hatch1fy/jump
+module github.com/gdbu/jump
 
 go 1.14
 
