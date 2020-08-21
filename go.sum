@@ -16,10 +16,10 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdbu/actions v0.5.7 h1:X0Hr+JtOKP+FMu2EgbG6PeWRWrWNLaza8BGpzJ/uuDM=
 github.com/gdbu/actions v0.5.7/go.mod h1:y01S5ocDpA/UM3MCGi5QJ/v3f3PrxSAQoaJ35fLQGbk=
-github.com/gdbu/apikeys v0.5.5 h1:MZy4drBB8zzrz9wF0cavrcZUeRf4QPtwVzToZBLKJt8=
-github.com/gdbu/apikeys v0.5.5/go.mod h1:vp6GBgWxGoSzEzDDF8AAqqInzZ16NZPZzc7VNGwTuA4=
-github.com/gdbu/dbl v0.5.11 h1:QwADR26NUXiggHYb6q6BVgT5R2LTsufXX+XCuwVEU6Q=
-github.com/gdbu/dbl v0.5.11/go.mod h1:aUPyd7rmkyC54pMdaJ+Heq0LBSpTQMHC7fbw7gvhzg4=
+github.com/gdbu/apikeys v0.5.6 h1:iAnui60QvwfYqkVG/Qgn+In4A/G0eiyrX5hcG5Jy0No=
+github.com/gdbu/apikeys v0.5.6/go.mod h1:+gNx9dSvwWmXIocD4y4UaDsunHLL9osNPs4M2GKD5Z8=
+github.com/gdbu/dbl v0.5.18 h1:hN0QabY14JROM/sErgeAfldkTANn8TqxPGvW5JJDIAw=
+github.com/gdbu/dbl v0.5.18/go.mod h1:B5vSauFoIVOF91qRnYSgtX6VFBez9r5EWFtWrr5RLwg=
 github.com/gdbu/dbutils v0.5.2 h1:baU2YuXfrac/kWWE3FysD48ZuyX68d7X6glyYTgrJ2o=
 github.com/gdbu/dbutils v0.5.2/go.mod h1:W9Z/Jl9DXhWKZmjcBzYJNTj3MCcaEd8mxV+eQvLBWDA=
 github.com/gdbu/logger v0.5.8 h1:LMHvnNr4wYn23SRnAPMkP8uQYEHIw49w3Wn0s1biD5w=
@@ -34,6 +34,8 @@ github.com/hatchify/atoms v0.4.79/go.mod h1:rj5Oi/MmC4N5juGypB+qZnBTxTJF8ywfykfp
 github.com/hatchify/closer v0.4.81/go.mod h1:7hAg+9xoRQoREhqTwR3BzDoMOY5MWCoDE/1U6pPqk/A=
 github.com/hatchify/colors v0.4.79 h1:E7LXqZVYDFNaTcQGxlBSfEKQ2rByeAUW84uKkat3AoA=
 github.com/hatchify/colors v0.4.79/go.mod h1:t0952Ef1zDFMVTCkOwhrdJS9ToVWTdcJ3PWCHZADLuU=
+github.com/hatchify/errors v0.4.82 h1:o7eB9r1X3Sx7PBRRXMCaAm+vXcoQLE4ZOesIv4oK36Q=
+github.com/hatchify/errors v0.4.82/go.mod h1:niCrsPjs0fFes147TgJ0LSUVdtavQTUvBxNoJm9Vew0=
 github.com/hatchify/mum v0.4.82 h1:JWasUIPXPSTVzg3rURG+zFmyHdIyO6ZgsYPK4/VTtvU=
 github.com/hatchify/mum v0.4.82/go.mod h1:8BFHpgNDhpbncKFZhtUPW7wbeDkx6wVVF2ZGozf4dC0=
 github.com/hatchify/scribe v0.4.84 h1:ybVsaWeGSY1mc4U/GYG8db23JvRcGFxxyGNQBaFivps=
