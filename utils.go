@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
 	"github.com/gdbu/jump/permissions"
+	"github.com/hatchify/errors"
 )
 
 const (

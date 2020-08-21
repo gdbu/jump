@@ -3,9 +3,9 @@ package jump
 import (
 	"fmt"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
 	"github.com/gdbu/jump/permissions"
+	"github.com/hatchify/errors"
 )
 
 // NewGrantPermissionsMW will create a new permissions middleware which will grant permissions to a new owner

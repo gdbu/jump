@@ -3,8 +3,8 @@ package users
 import (
 	"strings"
 
-	"github.com/Hatch1fy/errors"
 	core "github.com/gdbu/dbl"
+	"github.com/hatchify/errors"
 )
 
 const (

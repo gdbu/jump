@@ -4,10 +4,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/boltdb/bolt"
 	core "github.com/gdbu/dbl"
 	"github.com/gdbu/uuid"
+	"github.com/hatchify/errors"
 	"github.com/hatchify/scribe"
 )
 

@@ -3,7 +3,7 @@ package users
 import (
 	"strings"
 
-	"github.com/Hatch1fy/errors"
+	"github.com/hatchify/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 

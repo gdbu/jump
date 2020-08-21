@@ -3,8 +3,8 @@ package jump
 import (
 	"net/http"
 
-	"github.com/Hatch1fy/errors"
 	"github.com/Hatch1fy/httpserve"
+	"github.com/hatchify/errors"
 )
 
 const (

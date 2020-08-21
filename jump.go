@@ -6,7 +6,7 @@ import (
 
 	"github.com/hatchify/scribe"
 
-	"github.com/Hatch1fy/errors"
+	"github.com/hatchify/errors"
 
 	"github.com/gdbu/apikeys"
 	"github.com/gdbu/jump/permissions"
