@@ -1,6 +1,7 @@
 package permissions
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -33,27 +34,27 @@ func TestPermissions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = p.SetPermissions("posts", "users", ActionRead); err != nil {
+	if err = p.SetPermissions(context.Background(), "posts", "users", ActionRead); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.SetPermissions("posts", "admins", ActionRead|ActionWrite); err != nil {
+	if err = p.SetPermissions(context.Background(), "posts", "admins", ActionRead|ActionWrite); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.SetPermissions("posts", "writers", ActionWrite); err != nil {
+	if err = p.SetPermissions(context.Background(), "posts", "writers", ActionWrite); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser1, "users"); err != nil {
+	if err = p.AddGroup(context.Background(), testUser1, "users"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser2, "admins"); err != nil {
+	if err = p.AddGroup(context.Background(), testUser2, "admins"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser3, "writers"); err != nil {
+	if err = p.AddGroup(context.Background(), testUser3, "writers"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,7 +70,7 @@ func TestPermissions(t *testing.T) {
 
 	testPerms(p, t)
 
-	if err = p.SetPermissions("posts", "writers", ActionDelete); err != nil {
+	if err = p.SetPermissions(context.Background(), "posts", "writers", ActionDelete); err != nil {
 		t.Fatal(err)
 	}
 

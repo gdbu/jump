@@ -1,6 +1,7 @@
 package jump
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Hatch1fy/httpserve"
@@ -15,7 +16,8 @@ const (
 // Login will attempt to login with a provided email and password combo
 // If successful, a key/token pair will be returned to represent the session pair
 func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID string, err error) {
-	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
+	// TODO: use httpserve.Context here (needs PR's on httpserver Context type, out of scope currently)
+	if userID, err = j.usrs.MatchEmail(context.Background(), email, password); err != nil {
 		return
 	}
 
@@ -39,7 +41,8 @@ func (j *Jump) Logout(ctx *httpserve.Context) (err error) {
 		return
 	}
 
-	if err = j.sess.Remove(key, token); err != nil {
+	// TODO: use httpserve.Context here (needs PR's on httpserver Context type)
+	if err = j.sess.Remove(context.Background(), key, token); err != nil {
 		return
 	}
 

@@ -1,10 +1,12 @@
 package sessions
 
 import (
+	"context"
 	"sort"
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/gdbu/dbl"
 	core "github.com/gdbu/dbl"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
@@ -105,8 +107,11 @@ func (s *Sessions) getByUserID(txn *core.Transaction, userID string) (ss []*Sess
 
 func (s *Sessions) loop() {
 	for {
+		// Use a touch context with a timeout of 12 seconds
+		ctx := dbl.NewTouchContext(context.Background(), 12*time.Second)
+
 		oldest := time.Now().Add(time.Second * -SessionTimeout).Unix()
-		if err := s.Purge(oldest); err != nil {
+		if err := s.Purge(ctx, oldest); err != nil {
 			if err == bolt.ErrDatabaseNotOpen {
 				return
 			}
@@ -149,8 +154,8 @@ func (s *Sessions) invalidateUser(txn *core.Transaction, userID string) (err err
 }
 
 // Purge will purge all entries oldest than the oldest value
-func (s *Sessions) Purge(oldest int64) (err error) {
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+func (s *Sessions) Purge(ctx context.Context, oldest int64) (err error) {
+	err = s.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return s.purge(txn, oldest)
 	})
 
@@ -158,13 +163,13 @@ func (s *Sessions) Purge(oldest int64) (err error) {
 }
 
 // New will create a new token/key pair
-func (s *Sessions) New(userID string) (key, token string, err error) {
+func (s *Sessions) New(ctx context.Context, userID string) (key, token string, err error) {
 	// Set key/token
 	key, token = s.newKeyToken()
 	// Create new session
 	session := s.newSession(key, token, userID)
 
-	if err = s.c.Batch(func(txn *core.Transaction) (err error) {
+	if err = s.c.Batch(ctx, func(txn *core.Transaction) (err error) {
 		_, err = txn.New(&session)
 		return
 	}); err != nil {
@@ -177,10 +182,10 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 }
 
 // Get will retrieve the user id associated with a provided key/token pair
-func (s *Sessions) Get(key, token string) (userID string, err error) {
+func (s *Sessions) Get(ctx context.Context, key, token string) (userID string, err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Batch(func(txn *core.Transaction) (err error) {
+	err = s.c.Batch(ctx, func(txn *core.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -197,8 +202,8 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 }
 
 // GetByUserID will retrieve all the sessions for a given user ID
-func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
-	err = s.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+func (s *Sessions) GetByUserID(ctx context.Context, userID string) (ss []*Session, err error) {
+	err = s.c.ReadTransaction(ctx, func(txn *core.Transaction) (err error) {
 		ss, err = s.getByUserID(txn, userID)
 		return
 	})
@@ -207,10 +212,10 @@ func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
 }
 
 // Remove will invalidate a provided key/token pair session
-func (s *Sessions) Remove(key, token string) (err error) {
+func (s *Sessions) Remove(ctx context.Context, key, token string) (err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -223,8 +228,8 @@ func (s *Sessions) Remove(key, token string) (err error) {
 }
 
 // InvalidateUser will invalidate all sessions associated with a user
-func (s *Sessions) InvalidateUser(userID string) (err error) {
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+func (s *Sessions) InvalidateUser(ctx context.Context, userID string) (err error) {
+	err = s.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return s.invalidateUser(txn, userID)
 	})
 

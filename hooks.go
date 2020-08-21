@@ -1,11 +1,13 @@
 package jump
 
 import (
+	"context"
+
 	"github.com/Hatch1fy/httpserve"
 	"github.com/gdbu/jump/permissions"
 )
 
-func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {
+func (j *Jump) newPermissionHook(ctx context.Context, userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {
 	return func(statusCode int, storage httpserve.Storage) {
 		if statusCode >= 400 {
 			return
@@ -21,7 +23,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 		resourceKey := NewResourceKey(resourceName, resourceID)
 
 		var err error
-		if err = j.SetPermission(resourceKey, userID, actions, adminActions); err != nil {
+		if err = j.SetPermission(ctx, resourceKey, userID, actions, adminActions); err != nil {
 			j.out.Errorf("Error setting permissons for %s / %s: %v", userID, resourceName, err)
 		}
 

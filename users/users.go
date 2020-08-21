@@ -1,6 +1,7 @@
 package users
 
 import (
+	"context"
 	"strings"
 
 	core "github.com/gdbu/dbl"
@@ -172,7 +173,7 @@ func (u *Users) matchEmail(txn *core.Transaction, email, password string) (id st
 }
 
 // New will create a new user
-func (u *Users) New(email, password string) (entryID string, err error) {
+func (u *Users) New(ctx context.Context, email, password string) (entryID string, err error) {
 	if len(email) == 0 {
 		err = ErrInvalidEmail
 		return
@@ -185,7 +186,7 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 		return
 	}
 
-	err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		entryID, err = u.new(txn, &user)
 		return
 	})
@@ -195,7 +196,7 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 
 // Insert will insert an existing user
 // Note: No password hashing will occur
-func (u *Users) Insert(email, password string) (entryID string, err error) {
+func (u *Users) Insert(ctx context.Context, email, password string) (entryID string, err error) {
 	if len(email) == 0 {
 		err = ErrInvalidEmail
 		return
@@ -204,7 +205,7 @@ func (u *Users) Insert(email, password string) (entryID string, err error) {
 	user := newUser(email, password)
 	user.sanitize()
 
-	err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		entryID, err = u.new(txn, &user)
 		return
 	})
@@ -224,8 +225,8 @@ func (u *Users) Get(id string) (user *User, err error) {
 }
 
 // GetByEmail will get the user which matches the e,ail
-func (u *Users) GetByEmail(email string) (user *User, err error) {
-	if err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+func (u *Users) GetByEmail(ctx context.Context, email string) (user *User, err error) {
+	if err = u.c.ReadTransaction(ctx, func(txn *core.Transaction) (err error) {
 		if user, err = u.getByEmail(txn, email); err != nil {
 			return
 		}
@@ -255,7 +256,7 @@ func (u *Users) ForEach(fn func(*User) error) (err error) {
 }
 
 // UpdateEmail will change the user's email
-func (u *Users) UpdateEmail(id, email string) (err error) {
+func (u *Users) UpdateEmail(ctx context.Context, id, email string) (err error) {
 	if len(email) == 0 {
 		return ErrInvalidEmail
 	}
@@ -263,7 +264,7 @@ func (u *Users) UpdateEmail(id, email string) (err error) {
 	// Convert to lowercase
 	email = strings.ToLower(email)
 
-	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+	if err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return u.updateEmail(txn, id, email)
 	}); err != nil {
 		return
@@ -273,12 +274,12 @@ func (u *Users) UpdateEmail(id, email string) (err error) {
 }
 
 // UpdatePassword will change the user's password
-func (u *Users) UpdatePassword(id, password string) (err error) {
+func (u *Users) UpdatePassword(ctx context.Context, id, password string) (err error) {
 	if len(password) == 0 {
 		return ErrInvalidPassword
 	}
 
-	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+	if err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return u.updatePassword(txn, id, password)
 	}); err != nil {
 		return
@@ -288,8 +289,8 @@ func (u *Users) UpdatePassword(id, password string) (err error) {
 }
 
 // UpdateDisabled will change the user's disabled state
-func (u *Users) UpdateDisabled(id string, disabled bool) (err error) {
-	if err = u.c.Transaction(func(txn *core.Transaction) (err error) {
+func (u *Users) UpdateDisabled(ctx context.Context, id string, disabled bool) (err error) {
+	if err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return u.updateDisabled(txn, id, disabled)
 	}); err != nil {
 		return
@@ -299,8 +300,8 @@ func (u *Users) UpdateDisabled(id string, disabled bool) (err error) {
 }
 
 // Match will return the matching email for the provided id and password
-func (u *Users) Match(id, password string) (email string, err error) {
-	err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+func (u *Users) Match(ctx context.Context, id, password string) (email string, err error) {
+	err = u.c.ReadTransaction(ctx, func(txn *core.Transaction) (err error) {
 		email, err = u.match(txn, id, password)
 		return
 	})
@@ -309,8 +310,8 @@ func (u *Users) Match(id, password string) (email string, err error) {
 }
 
 // MatchEmail will return the matching user id for the provided email and password
-func (u *Users) MatchEmail(email, password string) (id string, err error) {
-	err = u.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+func (u *Users) MatchEmail(ctx context.Context, email, password string) (id string, err error) {
+	err = u.c.ReadTransaction(ctx, func(txn *core.Transaction) (err error) {
 		id, err = u.matchEmail(txn, email, password)
 		return
 	})

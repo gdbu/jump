@@ -1,6 +1,7 @@
 package jump
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -102,7 +103,8 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 		return
 	}
 
-	return j.sess.Get(key.Value, token.Value)
+	// TODO: use httpserve.Context here (needs PR's on httpserver Context type, out of scope currently)
+	return j.sess.Get(context.Background(), key.Value, token.Value)
 }
 
 // Permissions will return the underlying permissions

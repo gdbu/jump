@@ -1,6 +1,7 @@
 package jump
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Hatch1fy/httpserve"
@@ -23,7 +24,8 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 			return
 		}
 
-		hook := j.newPermissionHook(userID, resourceName, actions, adminActions)
+		// TODO: use httpserve.Context here (needs PR's on httpserver Context type, out of scope currently)
+		hook := j.newPermissionHook(context.Background(), userID, resourceName, actions, adminActions)
 		ctx.AddHook(hook)
 		return
 	}

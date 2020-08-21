@@ -1,6 +1,7 @@
 package jump
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Hatch1fy/httpserve"
@@ -9,7 +10,8 @@ import (
 // NewSession will apply a session
 func (j *Jump) NewSession(ctx *httpserve.Context, userID string) (err error) {
 	var key, token string
-	if key, token, err = j.sess.New(userID); err != nil {
+	// TODO: use httpserve.Context here (needs PR's on httpserver Context type, out of scope currently)
+	if key, token, err = j.sess.New(context.Background(), userID); err != nil {
 		return
 	}
 
