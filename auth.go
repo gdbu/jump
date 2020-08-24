@@ -2,6 +2,7 @@ package jump
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Hatch1fy/httpserve"
 	"github.com/hatchify/errors"
@@ -20,6 +21,7 @@ func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID str
 	}
 
 	err = j.NewSession(ctx, userID)
+	err = j.setLastLoggedInAt(userID, time.Now().Unix())
 	return
 }
 
