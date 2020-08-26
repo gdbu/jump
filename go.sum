@@ -14,10 +14,10 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdbu/actions v0.5.10 h1:/cJq/NRuW0DhJSNPHnnoWptiFBqm95Nj5jSXsEiv2Rw=
 github.com/gdbu/actions v0.5.10/go.mod h1:sSd/0VhQxcGohaBv2VQf73d/YzaOmUZFrewMZ/kJQM0=
-github.com/gdbu/apikeys v0.5.10 h1:44imdk2BZnmEQ8Vrk7sxCAB9IwQcLT6oqUZvB2msb6I=
-github.com/gdbu/apikeys v0.5.10/go.mod h1:/PI2Csi2wZ/feZWjjzCpCwOtZcLloDuka4Qk3dMQjx0=
-github.com/gdbu/dbl v0.5.24 h1:RkArXh9EDwrk+pRYIJRaBuAzLSp/OtQAGBMFV17Sb2A=
-github.com/gdbu/dbl v0.5.24/go.mod h1:pXlH8lTYlybSLDXJ1KBdkJM4UalMszPae8w2LDLA/9k=
+github.com/gdbu/apikeys v0.5.11 h1:kwkmsA71o85sadqhTWeWo/InridqM9ZvOazUzdT01rI=
+github.com/gdbu/apikeys v0.5.11/go.mod h1:9A10kn9PpgBExbUij377QFrUZUHN42CbSEoU7KzJ2F4=
+github.com/gdbu/dbl v0.5.25 h1:LaxCxdiejVcTUHzSzNs1enjQETnQH4733JxI4UlfQRM=
+github.com/gdbu/dbl v0.5.25/go.mod h1:pXlH8lTYlybSLDXJ1KBdkJM4UalMszPae8w2LDLA/9k=
 github.com/gdbu/dbutils v0.5.3 h1:nJXi4MkPTpP67K7vdpcrA1OVcNLyQ70ZsMnWq7aSEtw=
 github.com/gdbu/dbutils v0.5.3/go.mod h1:5ZrCjLny8ipC0EuRbiyOsNkB6hGJXbpljj7u9JH928w=
 github.com/gdbu/logger v0.5.11 h1:S4KzAFQXTz+Ygl/lntX306UEmR5j8lGwlF4ElpkoXAM=
