@@ -27,6 +27,12 @@ func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey str
 	return
 }
 
+// setLastLoggedInAt sets user last logged in at on the user struct
+func (j *Jump) setLastLoggedInAt(userID string, timestamp int64) (err error) {
+	err = j.usrs.UpdateLastLoggedInAt(userID, timestamp)
+	return
+}
+
 // CreateUser will create a user and assign it's basic groups
 // Note: It is advised that this function is used when creating users rather than directly calling j.Users().New()
 func (j *Jump) CreateUser(email, password string, groups ...string) (userID, apiKey string, err error) {

@@ -22,8 +22,9 @@ type User struct {
 
 	Disabled bool `json:"disabled"`
 
-	CreatedAt int64 `json:"createdAt"`
-	UpdatedAt int64 `json:"updatedAt"`
+	CreatedAt      int64 `json:"createdAt"`
+	UpdatedAt      int64 `json:"updatedAt"`
+	LastLoggedInAt int64 `json:"lastLoggedInAt,omitempty"`
 }
 
 func (u *User) sanitize() {
