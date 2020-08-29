@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Hatch1fy/httpserve"
 	"github.com/hatchify/errors"
+
+	vroomy "github.com/vroomy/common"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 
 // Login will attempt to login with a provided email and password combo
 // If successful, a key/token pair will be returned to represent the session pair
-func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID string, err error) {
+func (j *Jump) Login(ctx vroomy.Context, email, password string) (userID string, err error) {
 	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
 		return
 	}
@@ -26,18 +27,18 @@ func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID str
 }
 
 // Logout is the logout handler
-func (j *Jump) Logout(ctx *httpserve.Context) (err error) {
+func (j *Jump) Logout(ctx vroomy.Context) (err error) {
 	userID := ctx.Get("userID")
 	if len(userID) == 0 {
 		return ErrAlreadyLoggedOut
 	}
 
 	var key, token string
-	if key, err = getCookieValue(ctx.Request, CookieKey); err != nil {
+	if key, err = getCookieValue(ctx.GetRequest(), CookieKey); err != nil {
 		return
 	}
 
-	if token, err = getCookieValue(ctx.Request, CookieToken); err != nil {
+	if token, err = getCookieValue(ctx.GetRequest(), CookieToken); err != nil {
 		return
 	}
 
@@ -45,10 +46,10 @@ func (j *Jump) Logout(ctx *httpserve.Context) (err error) {
 		return
 	}
 
-	keyC := unsetCookie(ctx.Request.URL.Host, CookieKey, key)
-	tokenC := unsetCookie(ctx.Request.URL.Host, CookieToken, token)
+	keyC := unsetCookie(ctx.GetRequest().URL.Host, CookieKey, key)
+	tokenC := unsetCookie(ctx.GetRequest().URL.Host, CookieToken, token)
 
-	http.SetCookie(ctx.Writer, &keyC)
-	http.SetCookie(ctx.Writer, &tokenC)
+	http.SetCookie(ctx.GetWriter(), &keyC)
+	http.SetCookie(ctx.GetWriter(), &tokenC)
 	return
 }
