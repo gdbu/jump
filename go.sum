@@ -8,8 +8,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdbu/actions v0.5.12 h1:5wFRPuhkUpb1Nm1/AJtm54pTS0K+GrkJXBf3GVo2kRc=
 github.com/gdbu/actions v0.5.12/go.mod h1:acxuTSDQkVuOGZ8txjvxGT1wEXGOp7wHyBYprg8cAZQ=
-github.com/gdbu/apikeys v0.5.21 h1:h6xLdCcJviDXsOtPTrDzp45OdyiSfyGb0G1BZQCgado=
-github.com/gdbu/apikeys v0.5.21/go.mod h1:WotJaXzaR3x2cwBY3QPYD8hyChKXYl3NBDtbbPZsM10=
+github.com/gdbu/apikeys v0.5.22 h1:llGsJ1EA5oz3lRW+XHcXMt4VtQdt++2UxZKW9h2o5KM=
+github.com/gdbu/apikeys v0.5.22/go.mod h1:WotJaXzaR3x2cwBY3QPYD8hyChKXYl3NBDtbbPZsM10=
 github.com/gdbu/dbl v0.5.36 h1:pdFY8+wyDK2gRbJ5r/bLZEdmMIkFVQ9OI498LnVspk4=
 github.com/gdbu/dbl v0.5.36/go.mod h1:EZ3oPyCJXWd2MMCPGJOgOkLSY42ijMnYjomB8xyKpdo=
 github.com/gdbu/dbutils v0.5.4 h1:K+NMPXPcnujL/Vzxj0PxMwMgtoeQ6jWTu0SEcm4ShsI=
