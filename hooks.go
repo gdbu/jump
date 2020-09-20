@@ -3,12 +3,11 @@ package jump
 import (
 	"context"
 
-	"github.com/Hatch1fy/httpserve"
 	"github.com/gdbu/jump/permissions"
 )
 
 func (j *Jump) newPermissionHook(ctx context.Context, userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {
-	return func(statusCode int, storage httpserve.Storage) {
+	return func(statusCode int, storage map[string]string) {
 		if statusCode >= 400 {
 			return
 		}

@@ -126,6 +126,15 @@ func (u *Users) updateDisabled(txn *core.Transaction, id string, disabled bool) 
 	return
 }
 
+func (u *Users) updateLastLoggedInAt(txn *core.Transaction, id string, lastLoggedInAt int64) (err error) {
+	err = u.edit(txn, id, func(user *User) (err error) {
+		user.LastLoggedInAt = lastLoggedInAt
+		return
+	})
+
+	return
+}
+
 // Match will return the matching email for the provided id and password
 func (u *Users) match(txn *core.Transaction, id, password string) (email string, err error) {
 	var match User
@@ -292,6 +301,17 @@ func (u *Users) UpdatePassword(ctx context.Context, id, password string) (err er
 func (u *Users) UpdateDisabled(ctx context.Context, id string, disabled bool) (err error) {
 	if err = u.c.Transaction(ctx, func(txn *core.Transaction) (err error) {
 		return u.updateDisabled(txn, id, disabled)
+	}); err != nil {
+		return
+	}
+
+	return
+}
+
+// UpdateLastLoggedInAt will change the user's last logged in at timestamp
+func (u *Users) UpdateLastLoggedInAt(id string, lastLoggedInAt int64) (err error) {
+	if err = u.c.Batch(func(txn *core.Transaction) (err error) {
+		return u.updateLastLoggedInAt(txn, id, lastLoggedInAt)
 	}); err != nil {
 		return
 	}
