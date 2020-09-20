@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"context"
 	"sort"
 	"time"
 
@@ -120,7 +121,7 @@ func (s *Sessions) loop() {
 
 // purge will purge all entries oldest than the oldest value
 func (s *Sessions) purge(txn *core.Transaction, oldest int64) (err error) {
-	err = txn.ForEach(func(sessionID string, val core.Value) (err error) {
+	err = txn.ForEach("", func(sessionID string, val core.Value) (err error) {
 		session := val.(*Session)
 		if session.LastUsedAt >= oldest {
 			return
@@ -150,7 +151,7 @@ func (s *Sessions) invalidateUser(txn *core.Transaction, userID string) (err err
 
 // Purge will purge all entries oldest than the oldest value
 func (s *Sessions) Purge(oldest int64) (err error) {
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return s.purge(txn, oldest)
 	})
 
@@ -198,7 +199,7 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 
 // GetByUserID will retrieve all the sessions for a given user ID
 func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
-	err = s.c.ReadTransaction(func(txn *core.Transaction) (err error) {
+	err = s.c.ReadTransaction(context.Background(), func(txn *core.Transaction) (err error) {
 		ss, err = s.getByUserID(txn, userID)
 		return
 	})
@@ -210,7 +211,7 @@ func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
 func (s *Sessions) Remove(key, token string) (err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -224,7 +225,7 @@ func (s *Sessions) Remove(key, token string) (err error) {
 
 // InvalidateUser will invalidate all sessions associated with a user
 func (s *Sessions) InvalidateUser(userID string) (err error) {
-	err = s.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return s.invalidateUser(txn, userID)
 	})
 

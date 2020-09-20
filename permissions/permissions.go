@@ -1,6 +1,8 @@
 package permissions
 
 import (
+	"context"
+
 	core "github.com/gdbu/dbl"
 	"github.com/hatchify/errors"
 )
@@ -126,7 +128,7 @@ func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
 
 // SetPermissions will set the permissions for a resource key being accessed by given group
 func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return p.setPermissions(txn, resourceKey, group, actions)
 	})
 
@@ -135,7 +137,7 @@ func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) 
 
 // SetMultiPermissions will set the permissions for a resource key being accessed by given group
 func (p *Permissions) SetMultiPermissions(resourceKey string, pairs ...Pair) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		for _, pair := range pairs {
 			if err = p.setPermissions(txn, resourceKey, pair.Group, pair.Actions); err != nil {
 				return
@@ -150,7 +152,7 @@ func (p *Permissions) SetMultiPermissions(resourceKey string, pairs ...Pair) (er
 
 // UnsetPermissions will remove the permissions for a resource key being accessed by given group
 func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return p.unsetPermissions(txn, resourceKey, group)
 	})
 
@@ -159,7 +161,7 @@ func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
 
 // UnsetMultiPermissions will remove the permissions for a resource key being accessed set of groups
 func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		for _, group := range groups {
 			if err = p.unsetPermissions(txn, resourceKey, group); err != nil {
 				return
@@ -174,16 +176,16 @@ func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string
 
 // AddGroup will add a group to a userID
 func (p *Permissions) AddGroup(userID string, groups ...string) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return p.addGroup(txn, userID, groups)
 	})
 
 	return
 }
 
-// RemoveGroup will remove a group to a userID
+// RemoveGroup will remove a group from a userID
 func (p *Permissions) RemoveGroup(userID string, groups ...string) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return p.removeGroup(txn, userID, groups)
 	})
 
@@ -253,7 +255,7 @@ func (p *Permissions) HasGroup(userID, group string) (has bool) {
 
 // RemoveResource will remove a resource by key
 func (p *Permissions) RemoveResource(resourceKey string) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		return p.removeResource(txn, resourceKey)
 	})
 
@@ -262,7 +264,7 @@ func (p *Permissions) RemoveResource(resourceKey string) (err error) {
 
 // Transaction will initialize a transaction for all methods to be executed under
 func (p *Permissions) Transaction(fn func(*Transaction) error) (err error) {
-	err = p.c.Transaction(func(txn *core.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
 		t := newTransaction(txn, p)
 		err = fn(&t)
 		t.txn = nil
