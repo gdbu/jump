@@ -2,6 +2,8 @@ package sessions
 
 import (
 	"time"
+
+	"github.com/gdbu/dbl"
 )
 
 func newSession(key, userID string) (s Session) {
@@ -13,8 +15,7 @@ func newSession(key, userID string) (s Session) {
 
 // Session represents a user session
 type Session struct {
-	// ID of the Session
-	ID string `json:"id"`
+	dbl.Entry
 
 	// Session key
 	Key string `json:"key"`
@@ -22,8 +23,6 @@ type Session struct {
 	UserID string `json:"userID"`
 
 	LastUsedAt int64 `json:"lastUsedAt"`
-	CreatedAt  int64 `json:"createdAt"`
-	UpdatedAt  int64 `json:"updatedAt"`
 }
 
 func (s *Session) setAction() {
@@ -41,10 +40,10 @@ func (s *Session) GetCreatedAt() (createdAt int64) { return s.CreatedAt }
 // GetUpdatedAt will get the updated at timestamp
 func (s *Session) GetUpdatedAt() (updatedAt int64) { return s.UpdatedAt }
 
-// GetRelationshipIDs will get the associated relationship IDs
-func (s *Session) GetRelationshipIDs() (ids []string) {
-	ids = append(ids, s.Key)
-	ids = append(ids, s.UserID)
+// GetRelationships will get the associated relationship IDs
+func (s *Session) GetRelationships() (r dbl.Relationships) {
+	r.Append(s.Key)
+	r.Append(s.UserID)
 	return
 }
 
