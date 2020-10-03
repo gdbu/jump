@@ -3,6 +3,7 @@ package users
 import (
 	"strings"
 
+	"github.com/gdbu/dbl"
 	"github.com/hatchify/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,15 +16,13 @@ func newUser(email, password string) (u User) {
 
 // User represents a user
 type User struct {
-	ID string `json:"id"`
+	dbl.Entry
 
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
 
 	Disabled bool `json:"disabled"`
 
-	CreatedAt      int64 `json:"createdAt"`
-	UpdatedAt      int64 `json:"updatedAt"`
 	LastLoggedInAt int64 `json:"lastLoggedInAt,omitempty"`
 }
 
@@ -88,9 +87,9 @@ func (u *User) GetUpdatedAt() (updatedAt int64) {
 	return u.UpdatedAt
 }
 
-// GetRelationshipIDs will get the associated relationship IDs
-func (u *User) GetRelationshipIDs() (ids []string) {
-	ids = append(ids, u.Email)
+// GetRelationships will get the associated relationship IDs
+func (u *User) GetRelationships() (r dbl.Relationships) {
+	r.Append(u.Email)
 	return
 }
 

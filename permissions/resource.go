@@ -1,5 +1,7 @@
 package permissions
 
+import "github.com/gdbu/dbl"
+
 func newResource(key string) (r Resource) {
 	r.Key = key
 	r.Groups = make(Groups)
@@ -8,13 +10,10 @@ func newResource(key string) (r Resource) {
 
 // Resource represents a permissions resource entry
 type Resource struct {
-	ID string `json:"id"`
+	dbl.Entry
 
 	Key    string `json:"key"`
 	Groups `json:"groups"`
-
-	CreatedAt int64 `json:"createdAt"`
-	UpdatedAt int64 `json:"updatedAt"`
 }
 
 // core.Value interface methods below
@@ -28,9 +27,9 @@ func (r *Resource) GetCreatedAt() (createdAt int64) { return r.CreatedAt }
 // GetUpdatedAt will get the updated at timestamp
 func (r *Resource) GetUpdatedAt() (updatedAt int64) { return r.UpdatedAt }
 
-// GetRelationshipIDs will get the associated relationship IDs
-func (r *Resource) GetRelationshipIDs() (ids []string) {
-	ids = append(ids, r.Key)
+// GetRelationships will get the associated relationship IDs
+func (r *Resource) GetRelationships() (rs dbl.Relationships) {
+	rs.Append(r.Key)
 	return
 }
 
