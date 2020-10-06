@@ -73,7 +73,7 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) vroomy.Handl
 		switch ctx.GetRequest().Method {
 		case "GET", "OPTIONS":
 			action = permissions.ActionRead
-		case "PUT", "POST":
+		case "PUT", "POST", "PATCH":
 			action = permissions.ActionWrite
 		case "DELETE":
 			action = permissions.ActionDelete
