@@ -6,7 +6,6 @@ import (
 	"github.com/gdbu/jump/permissions"
 	"github.com/hatchify/errors"
 
-	vroomy "github.com/vroomy/common"
 	"github.com/vroomy/httpserve"
 )
 
@@ -32,8 +31,8 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 }
 
 // NewSetUserIDMW will set the user id of the currently logged in user
-func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx vroomy.Context) (res httpserve.Response)) {
-	return func(ctx vroomy.Context) (res httpserve.Response) {
+func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Context) (res httpserve.Response)) {
+	return func(ctx *httpserve.Context) (res httpserve.Response) {
 		var (
 			userID string
 			err    error

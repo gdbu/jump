@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/hatchify/errors"
-
-	vroomy "github.com/vroomy/common"
+	"github.com/vroomy/httpserve"
 )
 
 const (
@@ -16,7 +15,7 @@ const (
 
 // Login will attempt to login with a provided email and password combo
 // If successful, a key/token pair will be returned to represent the session pair
-func (j *Jump) Login(ctx vroomy.Context, email, password string) (userID string, err error) {
+func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID string, err error) {
 	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
 		return
 	}
@@ -27,7 +26,7 @@ func (j *Jump) Login(ctx vroomy.Context, email, password string) (userID string,
 }
 
 // Logout is the logout handler
-func (j *Jump) Logout(ctx vroomy.Context) (err error) {
+func (j *Jump) Logout(ctx *httpserve.Context) (err error) {
 	userID := ctx.Get("userID")
 	if len(userID) == 0 {
 		return ErrAlreadyLoggedOut

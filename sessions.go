@@ -3,11 +3,11 @@ package jump
 import (
 	"net/http"
 
-	vroomy "github.com/vroomy/common"
+	"github.com/vroomy/httpserve"
 )
 
 // NewSession will apply a session
-func (j *Jump) NewSession(ctx vroomy.Context, userID string) (err error) {
+func (j *Jump) NewSession(ctx *httpserve.Context, userID string) (err error) {
 	var key, token string
 	if key, token, err = j.sess.New(userID); err != nil {
 		return

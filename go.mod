@@ -10,7 +10,6 @@ require (
 	github.com/gdbu/uuid v0.0.3
 	github.com/hatchify/errors v0.4.82
 	github.com/hatchify/scribe v0.4.87
-	github.com/vroomy/common v0.2.0
 	github.com/vroomy/httpserve v0.5.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 )
