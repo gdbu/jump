@@ -7,13 +7,14 @@ import (
 	"github.com/hatchify/errors"
 
 	vroomy "github.com/vroomy/common"
+	"github.com/vroomy/httpserve"
 )
 
 // NewGrantPermissionsMW will create a new permissions middleware which will grant permissions to a new owner
 // Note: The user-group for the current user will be assigned the actions for the resourceName + resourceID (set in context storage).
 // If the resourceID is not available in the context, and error will be logged
-func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions permissions.Action) vroomy.Handler {
-	return func(ctx vroomy.Context) (res vroomy.Response) {
+func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions permissions.Action) httpserve.Handler {
+	return func(ctx *httpserve.Context) (res httpserve.Response) {
 		var (
 			userID string
 			err    error
@@ -31,8 +32,8 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 }
 
 // NewSetUserIDMW will set the user id of the currently logged in user
-func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx vroomy.Context) (res vroomy.Response)) {
-	return func(ctx vroomy.Context) (res vroomy.Response) {
+func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx vroomy.Context) (res httpserve.Response)) {
+	return func(ctx vroomy.Context) (res httpserve.Response) {
 		var (
 			userID string
 			err    error
@@ -50,10 +51,10 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx vroomy.Context) 
 
 		if err != nil {
 			if !redirectOnFail {
-				return ctx.NewJSONResponse(401, err)
+				return httpserve.NewJSONResponse(401, err)
 			}
 
-			return ctx.NewRedirectResponse(302, "/login")
+			return httpserve.NewRedirectResponse(302, "/login")
 		}
 
 		ctx.Put("userID", userID)
@@ -62,11 +63,11 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx vroomy.Context) 
 }
 
 // NewCheckPermissionsMW will check the user to ensure they have permissions to view a particular resource
-func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) vroomy.Handler {
-	return func(ctx vroomy.Context) (res vroomy.Response) {
+func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) httpserve.Handler {
+	return func(ctx *httpserve.Context) (res httpserve.Response) {
 		userID := ctx.Get("userID")
 		if len(userID) == 0 {
-			return ctx.NewJSONResponse(401, errors.Error("cannot assert permissions, user ID is empty"))
+			return httpserve.NewJSONResponse(401, errors.Error("cannot assert permissions, user ID is empty"))
 		}
 
 		var action permissions.Action
@@ -79,9 +80,8 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) vroomy.Handl
 			action = permissions.ActionDelete
 
 		default:
-			fmt.Println("INVALID METHOD?", ctx.GetRequest().Method)
 			err := fmt.Errorf("cannot assert permissions, unsupported method: %s", ctx.GetRequest().Method)
-			return ctx.NewJSONResponse(500, err)
+			return httpserve.NewJSONResponse(500, err)
 		}
 
 		var resourceID string
