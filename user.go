@@ -2,6 +2,7 @@ package jump
 
 import (
 	"github.com/gdbu/jump/users"
+	"github.com/hatchify/errors"
 )
 
 func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey string, err error) {
@@ -27,6 +28,15 @@ func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey str
 	return
 }
 
+func (j *Jump) postUserDeleteActions(userID string) (err error) {
+	var errs errors.ErrorList
+	errs.Push(j.perm.RemoveAllGroups(userID))
+
+	// TODO: Add API removal here
+
+	return
+}
+
 // setLastLoggedInAt sets user last logged in at on the user struct
 func (j *Jump) setLastLoggedInAt(userID string, timestamp int64) (err error) {
 	err = j.usrs.UpdateLastLoggedInAt(userID, timestamp)
@@ -41,6 +51,17 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 	}
 
 	apiKey, err = j.postUserCreateActions(userID, groups)
+	return
+}
+
+// DeleteUser will remove a user and delete it's ancillary references
+// Note: It is advised that this function is used when deleting users rather than directly calling j.Users().Delete()
+func (j *Jump) DeleteUser(userID string) (err error) {
+	if _, err = j.usrs.Delete(userID); err != nil {
+		return
+	}
+
+	err = j.postUserDeleteActions(userID)
 	return
 }
 

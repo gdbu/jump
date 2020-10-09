@@ -192,6 +192,20 @@ func (p *Permissions) RemoveGroup(userID string, groups ...string) (err error) {
 	return
 }
 
+// RemoveAllGroups will remove all groups from a userID
+func (p *Permissions) RemoveAllGroups(userID string, groups ...string) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
+		var groups []string
+		if groups, err = p.c.GetLookup(lookupGroups, userID); err != nil {
+			return
+		}
+
+		return p.removeGroup(txn, userID, groups)
+	})
+
+	return
+}
+
 // Can will return if a user (userID) can perform a given action on a provided resource id
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) {

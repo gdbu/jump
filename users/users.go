@@ -339,6 +339,22 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	return
 }
 
+// Delete will remove a user by ID
+func (u *Users) Delete(id string) (removed *User, err error) {
+	if err = u.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
+		if removed, err = u.getWithFn(id, txn.Get); err != nil {
+			return
+		}
+
+		return txn.Remove(id)
+	}); err != nil {
+		removed = nil
+		return
+	}
+
+	return
+}
+
 // Close will close the selected instance of users
 func (u *Users) Close() (err error) {
 	return u.c.Close()
