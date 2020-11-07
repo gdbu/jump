@@ -7,9 +7,9 @@ import (
 
 	"github.com/boltdb/bolt"
 	core "github.com/gdbu/dbl"
+	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
-	"github.com/hatchify/scribe"
 )
 
 const (

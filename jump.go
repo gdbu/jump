@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hatchify/scribe"
+	"github.com/gdbu/scribe"
 
 	"github.com/hatchify/errors"
 
