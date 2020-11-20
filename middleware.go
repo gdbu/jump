@@ -2,12 +2,15 @@ package jump
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/gdbu/jump/permissions"
 	"github.com/hatchify/errors"
 
 	"github.com/vroomy/httpserve"
 )
+
+var loginURL = url.URL{Path: "/login"}
 
 // NewGrantPermissionsMW will create a new permissions middleware which will grant permissions to a new owner
 // Note: The user-group for the current user will be assigned the actions for the resourceName + resourceID (set in context storage).
@@ -53,7 +56,7 @@ func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn func(ctx *httpserve.Conte
 				return httpserve.NewJSONResponse(401, err)
 			}
 
-			return httpserve.NewRedirectResponse(302, "/login")
+			return httpserve.NewRedirectResponse(302, getRedirectURL(ctx))
 		}
 
 		ctx.Put("userID", userID)

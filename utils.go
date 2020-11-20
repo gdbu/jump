@@ -88,3 +88,11 @@ func getCookieValue(req *http.Request, name string) (value string, err error) {
 	value = c.Value
 	return
 }
+
+func getRedirectURL(ctx *httpserve.Context) (redirectURL string) {
+	u := loginURL
+	q := u.Query()
+	q.Set("redirect", ctx.Request.URL.String())
+	u.RawQuery = q.Encode()
+	return u.String()
+}
