@@ -3,7 +3,7 @@ package sessions
 import (
 	"time"
 
-	"github.com/gdbu/dbl"
+	"github.com/mojura/mojura"
 )
 
 func newSession(key, userID string) (s Session) {
@@ -15,7 +15,7 @@ func newSession(key, userID string) (s Session) {
 
 // Session represents a user session
 type Session struct {
-	dbl.Entry
+	mojura.Entry
 
 	// Session key
 	Key string `json:"key"`
@@ -29,7 +29,7 @@ func (s *Session) setAction() {
 	s.LastUsedAt = time.Now().Unix()
 }
 
-// core.Value interface methods below
+// mojura.Value interface methods below
 
 // GetID will get the message ID
 func (s *Session) GetID() (id string) { return s.ID }
@@ -41,7 +41,7 @@ func (s *Session) GetCreatedAt() (createdAt int64) { return s.CreatedAt }
 func (s *Session) GetUpdatedAt() (updatedAt int64) { return s.UpdatedAt }
 
 // GetRelationships will get the associated relationship IDs
-func (s *Session) GetRelationships() (r dbl.Relationships) {
+func (s *Session) GetRelationships() (r mojura.Relationships) {
 	r.Append(s.Key)
 	r.Append(s.UserID)
 	return

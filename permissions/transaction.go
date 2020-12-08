@@ -1,8 +1,8 @@
 package permissions
 
-import core "github.com/gdbu/dbl"
+import "github.com/mojura/mojura"
 
-func newTransaction(txn *core.Transaction, p *Permissions) (t Transaction) {
+func newTransaction(txn *mojura.Transaction, p *Permissions) (t Transaction) {
 	t.txn = txn
 	t.p = p
 	return
@@ -11,7 +11,7 @@ func newTransaction(txn *core.Transaction, p *Permissions) (t Transaction) {
 
 // Transaction is the reminders manager
 type Transaction struct {
-	txn *core.Transaction
+	txn *mojura.Transaction
 	p   *Permissions
 }
 

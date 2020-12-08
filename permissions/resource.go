@@ -1,6 +1,8 @@
 package permissions
 
-import "github.com/gdbu/dbl"
+import (
+	"github.com/mojura/mojura"
+)
 
 func newResource(key string) (r Resource) {
 	r.Key = key
@@ -10,13 +12,13 @@ func newResource(key string) (r Resource) {
 
 // Resource represents a permissions resource entry
 type Resource struct {
-	dbl.Entry
+	mojura.Entry
 
 	Key    string `json:"key"`
 	Groups `json:"groups"`
 }
 
-// core.Value interface methods below
+// mojura.Value interface methods below
 
 // GetID will get the message ID
 func (r *Resource) GetID() (id string) { return r.ID }
@@ -28,7 +30,7 @@ func (r *Resource) GetCreatedAt() (createdAt int64) { return r.CreatedAt }
 func (r *Resource) GetUpdatedAt() (updatedAt int64) { return r.UpdatedAt }
 
 // GetRelationships will get the associated relationship IDs
-func (r *Resource) GetRelationships() (rs dbl.Relationships) {
+func (r *Resource) GetRelationships() (rs mojura.Relationships) {
 	rs.Append(r.Key)
 	return
 }

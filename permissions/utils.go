@@ -1,9 +1,9 @@
 package permissions
 
-import core "github.com/gdbu/dbl"
+import "github.com/mojura/mojura"
 
 type source interface {
-	New(value core.Value) (resourceID string, err error)
+	New(value mojura.Value) (resourceID string, err error)
 	GetByRelationship(relationship, relationshipID string, value interface{}) error
 }
 

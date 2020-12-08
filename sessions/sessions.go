@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	core "github.com/gdbu/dbl"
 	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
+	"github.com/mojura/mojura"
 )
 
 const (
@@ -39,7 +39,7 @@ var (
 func New(dir string) (sp *Sessions, err error) {
 	var s Sessions
 	s.out = scribe.New("Sessions")
-	if s.c, err = core.New("sessions", dir, &Session{}, relationships...); err != nil {
+	if s.c, err = mojura.New("sessions", dir, &Session{}, relationships...); err != nil {
 		return
 	}
 
@@ -54,7 +54,7 @@ func New(dir string) (sp *Sessions, err error) {
 // Sessions manages sessions
 type Sessions struct {
 	out *scribe.Scribe
-	c   *core.Core
+	c   *mojura.Mojura
 	g   *uuid.Generator
 }
 
@@ -76,14 +76,14 @@ func (s *Sessions) newSession(key, token, userID string) Session {
 	return newSession(sessionKey, userID)
 }
 
-func (s *Sessions) getByKey(txn *core.Transaction, key string) (sp *Session, err error) {
+func (s *Sessions) getByKey(txn *mojura.Transaction, key string) (sp *Session, err error) {
 	var ss []*Session
 	if err = txn.GetByRelationship(relationshipKeys, key, &ss); err != nil {
 		return
 	}
 
 	if len(ss) == 0 {
-		err = core.ErrEntryNotFound
+		err = mojura.ErrEntryNotFound
 		return
 	}
 
@@ -91,7 +91,7 @@ func (s *Sessions) getByKey(txn *core.Transaction, key string) (sp *Session, err
 	return
 }
 
-func (s *Sessions) getByUserID(txn *core.Transaction, userID string) (ss []*Session, err error) {
+func (s *Sessions) getByUserID(txn *mojura.Transaction, userID string) (ss []*Session, err error) {
 	if err = txn.GetByRelationship(relationshipUsers, userID, &ss); err != nil {
 		return
 	}
@@ -120,8 +120,8 @@ func (s *Sessions) loop() {
 }
 
 // purge will purge all entries oldest than the oldest value
-func (s *Sessions) purge(txn *core.Transaction, oldest int64) (err error) {
-	err = txn.ForEach("", func(sessionID string, val core.Value) (err error) {
+func (s *Sessions) purge(txn *mojura.Transaction, oldest int64) (err error) {
+	err = txn.ForEach("", func(sessionID string, val mojura.Value) (err error) {
 		session := val.(*Session)
 		if session.LastUsedAt >= oldest {
 			return
@@ -134,7 +134,7 @@ func (s *Sessions) purge(txn *core.Transaction, oldest int64) (err error) {
 }
 
 // Remove will invalidate a provided key/token pair session
-func (s *Sessions) invalidateUser(txn *core.Transaction, userID string) (err error) {
+func (s *Sessions) invalidateUser(txn *mojura.Transaction, userID string) (err error) {
 	var ss []*Session
 	if ss, err = s.getByUserID(txn, userID); err != nil {
 		return
@@ -151,7 +151,7 @@ func (s *Sessions) invalidateUser(txn *core.Transaction, userID string) (err err
 
 // Purge will purge all entries oldest than the oldest value
 func (s *Sessions) Purge(oldest int64) (err error) {
-	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
 		return s.purge(txn, oldest)
 	})
 
@@ -165,7 +165,7 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 	// Create new session
 	session := s.newSession(key, token, userID)
 
-	if err = s.c.Batch(func(txn *core.Transaction) (err error) {
+	if err = s.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
 		_, err = txn.New(&session)
 		return
 	}); err != nil {
@@ -181,7 +181,7 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 func (s *Sessions) Get(key, token string) (userID string, err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Batch(func(txn *core.Transaction) (err error) {
+	err = s.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -199,7 +199,7 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 
 // GetByUserID will retrieve all the sessions for a given user ID
 func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
-	err = s.c.ReadTransaction(context.Background(), func(txn *core.Transaction) (err error) {
+	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
 		ss, err = s.getByUserID(txn, userID)
 		return
 	})
@@ -211,7 +211,7 @@ func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
 func (s *Sessions) Remove(key, token string) (err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
-	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -225,7 +225,7 @@ func (s *Sessions) Remove(key, token string) (err error) {
 
 // InvalidateUser will invalidate all sessions associated with a user
 func (s *Sessions) InvalidateUser(userID string) (err error) {
-	err = s.c.Transaction(context.Background(), func(txn *core.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
 		return s.invalidateUser(txn, userID)
 	})
 

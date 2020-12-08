@@ -3,8 +3,8 @@ package users
 import (
 	"strings"
 
-	"github.com/gdbu/dbl"
 	"github.com/hatchify/errors"
+	"github.com/mojura/mojura"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,7 +16,7 @@ func newUser(email, password string) (u User) {
 
 // User represents a user
 type User struct {
-	dbl.Entry
+	mojura.Entry
 
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
@@ -70,40 +70,40 @@ func (u *User) hashPassword() (err error) {
 	return
 }
 
-// Everything below are methods required for the core.Value interface
+// Everything below are methods required for the mojura.Value interface
 
-// GetID is a core.Value interface method which will get the user's ID
+// GetID is a mojura.Value interface method which will get the user's ID
 func (u *User) GetID() (id string) {
 	return u.ID
 }
 
-// GetCreatedAt is a core.Value interface method which will get the user's created at timestamp
+// GetCreatedAt is a mojura.Value interface method which will get the user's created at timestamp
 func (u *User) GetCreatedAt() (createdAt int64) {
 	return u.CreatedAt
 }
 
-// GetUpdatedAt is a core.Value interface method which will get the user's updated at timestamp
+// GetUpdatedAt is a mojura.Value interface method which will get the user's updated at timestamp
 func (u *User) GetUpdatedAt() (updatedAt int64) {
 	return u.UpdatedAt
 }
 
 // GetRelationships will get the associated relationship IDs
-func (u *User) GetRelationships() (r dbl.Relationships) {
+func (u *User) GetRelationships() (r mojura.Relationships) {
 	r.Append(u.Email)
 	return
 }
 
-// SetID is a core.Value interface method which will set the user's ID
+// SetID is a mojura.Value interface method which will set the user's ID
 func (u *User) SetID(id string) {
 	u.ID = id
 }
 
-// SetCreatedAt is a core.Value interface method which will set the user's created at timestamp
+// SetCreatedAt is a mojura.Value interface method which will set the user's created at timestamp
 func (u *User) SetCreatedAt(createdAt int64) {
 	u.CreatedAt = createdAt
 }
 
-// SetUpdatedAt is a core.Value interface method which will set the user's updated at timestamp
+// SetUpdatedAt is a mojura.Value interface method which will set the user's updated at timestamp
 func (u *User) SetUpdatedAt(updatedAt int64) {
 	u.UpdatedAt = updatedAt
 }
