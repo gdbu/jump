@@ -5,7 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
@@ -108,10 +107,6 @@ func (s *Sessions) loop() {
 	for {
 		oldest := time.Now().Add(time.Second * -SessionTimeout).Unix()
 		if err := s.Purge(oldest); err != nil {
-			if err == bolt.ErrDatabaseNotOpen {
-				return
-			}
-
 			s.out.Errorf("error purging: %v", err)
 		}
 
