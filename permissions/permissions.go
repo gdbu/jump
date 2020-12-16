@@ -3,6 +3,7 @@ package permissions
 import (
 	"context"
 
+	"github.com/gdbu/jump/groups"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
 )
@@ -20,10 +21,6 @@ const (
 	relationshipResourceKeys = "resourceKeys"
 )
 
-const (
-	lookupGroups = "groups"
-)
-
 // New will return a new instance of Permissions
 func New(dir string) (pp *Permissions, err error) {
 	var p Permissions
@@ -38,6 +35,7 @@ func New(dir string) (pp *Permissions, err error) {
 // Permissions manages permissions
 type Permissions struct {
 	c *mojura.Mojura
+	g *groups.Groups
 }
 
 func (p *Permissions) setPermissions(txn *mojura.Transaction, resourceKey, group string, actions Action) (err error) {
@@ -73,40 +71,6 @@ func (p *Permissions) removeResource(txn *mojura.Transaction, resourceKey string
 	}
 
 	return txn.Remove(r.ID)
-}
-
-func (p *Permissions) addGroup(txn *mojura.Transaction, userID string, groups []string) (err error) {
-	updated := false
-	for _, group := range groups {
-		if err = txn.SetLookup(lookupGroups, userID, group); err != nil {
-			return
-		}
-
-		updated = true
-	}
-
-	if !updated {
-		return
-	}
-
-	return
-}
-
-func (p *Permissions) removeGroup(txn *mojura.Transaction, userID string, groups []string) (err error) {
-	updated := false
-	for _, group := range groups {
-		if err = txn.RemoveLookup(lookupGroups, userID, group); err != nil {
-			return
-		}
-
-		updated = true
-	}
-
-	if !updated {
-		return
-	}
-
-	return
 }
 
 // Get will get the resource entry for a given resource ID
@@ -174,24 +138,6 @@ func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string
 	return
 }
 
-// AddGroup will add a group to a userID
-func (p *Permissions) AddGroup(userID string, groups ...string) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
-		return p.addGroup(txn, userID, groups)
-	})
-
-	return
-}
-
-// RemoveGroup will remove a group from a userID
-func (p *Permissions) RemoveGroup(userID string, groups ...string) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
-		return p.removeGroup(txn, userID, groups)
-	})
-
-	return
-}
-
 // Can will return if a user (userID) can perform a given action on a provided resource id
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) {
@@ -205,7 +151,7 @@ func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) 
 		return
 	}
 
-	if groups, err = p.c.GetLookup(lookupGroups, userID); err != nil {
+	if groups, err = p.g.Get(userID); err != nil {
 		return
 	}
 
@@ -228,31 +174,6 @@ func (p *Permissions) Has(resourceID, group string) (ok bool) {
 	return e.Has(group)
 }
 
-// Groups will return a slice of the groups a user belongs to
-func (p *Permissions) Groups(userID string) (groups []string, err error) {
-	return p.c.GetLookup(lookupGroups, userID)
-}
-
-// HasGroup will return if a user belongs to a given group
-func (p *Permissions) HasGroup(userID, group string) (has bool) {
-	var (
-		groups []string
-		err    error
-	)
-
-	if groups, err = p.c.GetLookup(lookupGroups, userID); err != nil {
-		return
-	}
-
-	for _, g := range groups {
-		if g == group {
-			return true
-		}
-	}
-
-	return false
-}
-
 // RemoveResource will remove a resource by key
 func (p *Permissions) RemoveResource(resourceKey string) (err error) {
 	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
@@ -271,6 +192,12 @@ func (p *Permissions) Transaction(fn func(*Transaction) error) (err error) {
 		return
 	})
 
+	return
+}
+
+// SetGroups will set the groups controller
+func (p *Permissions) SetGroups(g *groups.Groups) {
+	p.g = g
 	return
 }
 
