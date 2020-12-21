@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gdbu/jump/groups"
 	"github.com/hatchify/errors"
 )
 
@@ -21,6 +22,7 @@ const (
 func TestPermissions(t *testing.T) {
 	var (
 		p   *Permissions
+		g   *groups.Groups
 		err error
 	)
 
@@ -32,6 +34,12 @@ func TestPermissions(t *testing.T) {
 	if p, err = New("./_testdata"); err != nil {
 		t.Fatal(err)
 	}
+
+	if g, err = groups.New("./_testdata"); err != nil {
+		t.Fatal(err)
+	}
+
+	p.SetGroups(g)
 
 	if err = p.SetPermissions("posts", "users", ActionRead); err != nil {
 		t.Fatal(err)
@@ -45,15 +53,15 @@ func TestPermissions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser1, "users"); err != nil {
+	if _, err = p.g.AddGroups(testUser1, "users"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser2, "admins"); err != nil {
+	if _, err = p.g.AddGroups(testUser2, "admins"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = p.AddGroup(testUser3, "writers"); err != nil {
+	if _, err = p.g.AddGroups(testUser3, "writers"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -66,6 +74,9 @@ func TestPermissions(t *testing.T) {
 	if p, err = New("./_testdata"); err != nil {
 		t.Fatal(err)
 	}
+
+	// Set groups again
+	p.SetGroups(g)
 
 	testPerms(p, t)
 

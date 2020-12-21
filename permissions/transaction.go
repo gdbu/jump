@@ -52,16 +52,6 @@ func (t *Transaction) UnsetPermissions(resourceKey, group string) (err error) {
 	return t.p.unsetPermissions(t.txn, resourceKey, group)
 }
 
-// AddGroup will add a group to a userID
-func (t *Transaction) AddGroup(userID string, groups ...string) (err error) {
-	return t.p.addGroup(t.txn, userID, groups)
-}
-
-// RemoveGroup will remove a group to a userID
-func (t *Transaction) RemoveGroup(userID string, groups ...string) (err error) {
-	return t.p.removeGroup(t.txn, userID, groups)
-}
-
 // Can will return if a user (userID) can perform a given action on a provided resource id
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) {
@@ -75,7 +65,7 @@ func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) 
 		return
 	}
 
-	if groups, err = t.txn.GetLookup(lookupGroups, userID); err != nil {
+	if groups, err = t.p.g.Get(userID); err != nil {
 		return
 	}
 
@@ -100,7 +90,7 @@ func (t *Transaction) Has(resourceID, group string) (ok bool) {
 
 // Groups will return a slice of the groups a user belongs to
 func (t *Transaction) Groups(userID string) (groups []string, err error) {
-	return t.txn.GetLookup(lookupGroups, userID)
+	return t.p.g.Get(userID)
 }
 
 // RemoveResource will remove a resource by key

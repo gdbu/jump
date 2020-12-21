@@ -9,6 +9,7 @@ import (
 	"github.com/hatchify/errors"
 
 	"github.com/gdbu/apikeys"
+	"github.com/gdbu/jump/groups"
 	"github.com/gdbu/jump/permissions"
 	"github.com/gdbu/jump/sessions"
 	"github.com/gdbu/jump/users"
@@ -55,6 +56,11 @@ func New(dir string) (jp *Jump, err error) {
 		return
 	}
 
+	if j.grps, err = groups.New(dir); err != nil {
+		return
+	}
+
+	j.perm.SetGroups(j.grps)
 	jp = &j
 	return
 }
@@ -67,6 +73,7 @@ type Jump struct {
 	sess *sessions.Sessions
 	api  *apikeys.APIKeys
 	usrs *users.Users
+	grps *groups.Groups
 }
 
 func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {

@@ -9,7 +9,7 @@ func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey str
 	groups = append([]string{userID}, groups...)
 
 	// Add groups to user
-	if err = j.perm.AddGroup(userID, groups...); err != nil {
+	if _, err = j.grps.AddGroups(userID, groups...); err != nil {
 		return
 	}
 
