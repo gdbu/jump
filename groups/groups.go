@@ -20,7 +20,7 @@ var relationships = []string{
 // New will return a new instance of users
 func New(dir string) (gp *Groups, err error) {
 	var g Groups
-	if g.c, err = mojura.New("groups", dir, &Entry{}, relationships...); err != nil {
+	if g.c, err = mojura.New("usergroups", dir, &Entry{}, relationships...); err != nil {
 		return
 	}
 
