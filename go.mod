@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/gdbu/apikeys v0.7.3
 	github.com/gdbu/scribe v0.4.88
 	github.com/gdbu/stringset v0.1.5
 	github.com/gdbu/uuid v0.0.3
