@@ -122,9 +122,19 @@ func (j *Jump) Users() *users.Users {
 	return j.usrs
 }
 
+// Groups will return the underlying groups
+func (j *Jump) Groups() *groups.Groups {
+	return j.grps
+}
+
 // Sessions will return the underlying sessions
 func (j *Jump) Sessions() *sessions.Sessions {
 	return j.sess
+}
+
+// APIKeys will return the underlying apikeys
+func (j *Jump) APIKeys() *apikeys.APIKeys {
+	return j.api
 }
 
 // Close will close jump
