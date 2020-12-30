@@ -1,6 +1,6 @@
 package jump
 
-import "github.com/gdbu/apikeys"
+import "github.com/gdbu/jump/apikeys"
 
 // GetAPIKeysByUser will return the api keys for a user
 func (j *Jump) GetAPIKeysByUser(userID string) (as []*apikeys.APIKey, err error) {

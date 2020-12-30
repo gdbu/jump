@@ -8,7 +8,7 @@ import (
 
 	"github.com/hatchify/errors"
 
-	"github.com/gdbu/apikeys"
+	"github.com/gdbu/jump/apikeys"
 	"github.com/gdbu/jump/groups"
 	"github.com/gdbu/jump/permissions"
 	"github.com/gdbu/jump/sessions"
