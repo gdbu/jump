@@ -11,5 +11,5 @@ require (
 	github.com/hatchify/errors v0.4.82
 	github.com/mojura/mojura v0.8.7
 	github.com/vroomy/httpserve v0.5.4
-	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 )
