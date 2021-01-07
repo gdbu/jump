@@ -2,11 +2,11 @@ package jump
 
 import (
 	"github.com/gdbu/jump/permissions"
-	"github.com/vroomy/httpserve"
+	"github.com/vroomy/common"
 )
 
-func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {
-	return func(statusCode int, ctx *httpserve.Context) {
+func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActions permissions.Action) (hook common.Hook) {
+	return func(statusCode int, ctx common.Context) {
 		if statusCode >= 400 {
 			return
 		}

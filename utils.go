@@ -7,7 +7,7 @@ import (
 
 	"github.com/gdbu/jump/permissions"
 	"github.com/hatchify/errors"
-	"github.com/vroomy/httpserve"
+	"github.com/vroomy/common"
 )
 
 const (
@@ -29,7 +29,7 @@ func NewResourceKey(resourceName, resourceID string) (resourceKey string) {
 	return fmt.Sprintf("%s::%s", resourceName, resourceID)
 }
 
-func getUserID(ctx *httpserve.Context) (userID string, err error) {
+func getUserID(ctx common.Context) (userID string, err error) {
 	if userID = ctx.Get("userID"); len(userID) == 0 {
 		err = errors.Error("cannot assert permissions, userID is empty")
 		return
@@ -38,8 +38,8 @@ func getUserID(ctx *httpserve.Context) (userID string, err error) {
 	return
 }
 
-func getAPIKey(ctx *httpserve.Context) (apiKey string) {
-	q := ctx.GetRequest().URL.Query()
+func getAPIKey(ctx common.Context) (apiKey string) {
+	q := ctx.Request().URL.Query()
 
 	if apiKey = q.Get("apiKey"); len(apiKey) > 0 {
 		return
@@ -50,7 +50,7 @@ func getAPIKey(ctx *httpserve.Context) (apiKey string) {
 		ok   bool
 	)
 
-	if vals, ok = ctx.GetRequest().Header["X-Api-Key"]; !ok {
+	if vals, ok = ctx.Request().Header["X-Api-Key"]; !ok {
 		return
 	}
 
@@ -89,10 +89,10 @@ func getCookieValue(req *http.Request, name string) (value string, err error) {
 	return
 }
 
-func getRedirectURL(ctx *httpserve.Context) (redirectURL string) {
+func getRedirectURL(ctx common.Context) (redirectURL string) {
 	u := loginURL
 	q := u.Query()
-	q.Set("redirect", ctx.Request.URL.String())
+	q.Set("redirect", ctx.Request().URL.String())
 	u.RawQuery = q.Encode()
 	return u.String()
 }
