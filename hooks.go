@@ -6,13 +6,13 @@ import (
 )
 
 func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActions permissions.Action) (hook httpserve.Hook) {
-	return func(statusCode int, storage httpserve.Storage) {
+	return func(statusCode int, ctx *httpserve.Context) {
 		if statusCode >= 400 {
 			return
 		}
 
 		var resourceID string
-		if resourceID = storage["resourceID"]; len(resourceID) == 0 {
+		if resourceID = ctx.Get("resourceID"); len(resourceID) == 0 {
 			j.out.Errorf("Error setting permissions: %v", ErrResourceIDIsEmpty)
 			return
 		}
