@@ -9,6 +9,6 @@ require (
 	github.com/gdbu/uuid v0.1.0
 	github.com/hatchify/errors v0.4.82
 	github.com/mojura/mojura v0.8.11
-	github.com/vroomy/common v0.5.1
+	github.com/vroomy/common v0.5.2
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 )
