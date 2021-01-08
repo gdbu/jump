@@ -25,6 +25,19 @@ func (j *Jump) Login(ctx common.Context, email, password string) (userID string,
 	return
 }
 
+// SSOLogin will attempt to login with a provided login code
+// If successful, a key/token pair will be returned to represent the session pair
+func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
+	var userID string
+	if userID, err = j.sso.Login(ctx.Request().Context(), loginCode); err != nil {
+		return
+	}
+
+	err = j.NewSession(ctx, userID)
+	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	return
+}
+
 // Logout is the logout handler
 func (j *Jump) Logout(ctx common.Context) (err error) {
 	userID := ctx.Get("userID")
