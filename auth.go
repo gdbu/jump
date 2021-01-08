@@ -1,6 +1,7 @@
 package jump
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -28,14 +29,14 @@ func (j *Jump) Login(ctx common.Context, email, password string) (userID string,
 }
 
 // NewSSO will create a new SSO session
-func (j *Jump) NewSSO(ctx common.Context, email string) (loginCode string, err error) {
+func (j *Jump) NewSSO(ctx context.Context, email string) (loginCode string, err error) {
 	var u *users.User
 	if u, err = j.usrs.GetByEmail(email); err != nil {
 		return
 	}
 
 	var e *sso.Entry
-	if e, err = j.sso.New(ctx.Request().Context(), u.ID); err != nil {
+	if e, err = j.sso.New(ctx, u.ID); err != nil {
 		return
 	}
 
