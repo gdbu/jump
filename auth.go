@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gdbu/jump/sso"
+	"github.com/gdbu/jump/users"
 	"github.com/hatchify/errors"
 	"github.com/vroomy/common"
 )
@@ -22,6 +24,22 @@ func (j *Jump) Login(ctx common.Context, email, password string) (userID string,
 
 	err = j.NewSession(ctx, userID)
 	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	return
+}
+
+// NewSSO will create a new SSO session
+func (j *Jump) NewSSO(ctx common.Context, email string) (loginCode string, err error) {
+	var u *users.User
+	if u, err = j.usrs.GetByEmail(email); err != nil {
+		return
+	}
+
+	var e *sso.Entry
+	if e, err = j.sso.New(ctx.Request().Context(), u.ID); err != nil {
+		return
+	}
+
+	loginCode = e.LoginCode.String()
 	return
 }
 
