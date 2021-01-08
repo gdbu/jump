@@ -12,6 +12,7 @@ import (
 	"github.com/gdbu/jump/groups"
 	"github.com/gdbu/jump/permissions"
 	"github.com/gdbu/jump/sessions"
+	"github.com/gdbu/jump/sso"
 	"github.com/gdbu/jump/users"
 )
 
@@ -60,6 +61,10 @@ func New(dir string) (jp *Jump, err error) {
 		return
 	}
 
+	if j.sso, err = sso.New(dir); err != nil {
+		return
+	}
+
 	j.perm.SetGroups(j.grps)
 	jp = &j
 	return
@@ -74,6 +79,7 @@ type Jump struct {
 	api  *apikeys.APIKeys
 	usrs *users.Users
 	grps *groups.Groups
+	sso  *sso.Controller
 }
 
 func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
@@ -135,6 +141,11 @@ func (j *Jump) Sessions() *sessions.Sessions {
 // APIKeys will return the underlying apikeys
 func (j *Jump) APIKeys() *apikeys.APIKeys {
 	return j.api
+}
+
+// SSO will return the underlying sso
+func (j *Jump) SSO() *sso.Controller {
+	return j.sso
 }
 
 // Close will close jump
