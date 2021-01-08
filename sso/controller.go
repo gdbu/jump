@@ -2,6 +2,7 @@ package sso
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gdbu/uuid"
@@ -347,6 +348,15 @@ func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID st
 	// Remove entry which matches the login code
 	if removed, err = c.deleteByCode(txn, loginCode); removed == nil {
 		// No entry was found, return
+		return
+	}
+
+	// Get current timestamp
+	now := time.Now()
+
+	// Check to see if entry has expired
+	if now.After(removed.ExpiresAt) {
+		err = fmt.Errorf("cannot login, entry expired at: %v", removed.ExpiresAt)
 		return
 	}
 
