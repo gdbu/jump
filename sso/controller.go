@@ -6,7 +6,13 @@ import (
 	"time"
 
 	"github.com/gdbu/uuid"
+	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+)
+
+const (
+	// ErrNoCodeMatchFound is returned when a login code match cannot be found
+	ErrNoCodeMatchFound = errors.Error("no login code match was found")
 )
 
 // Relationship key const block
@@ -236,6 +242,7 @@ func (c *Controller) getByUser(txn *mojura.Transaction, userID string) (entry *E
 		return
 	}
 
+	entry = &e
 	return
 }
 
@@ -247,6 +254,7 @@ func (c *Controller) getByCode(txn *mojura.Transaction, loginCode string) (entry
 		return
 	}
 
+	entry = &e
 	return
 }
 
@@ -346,8 +354,11 @@ func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction) (err error)
 func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID string, err error) {
 	var removed *Entry
 	// Remove entry which matches the login code
-	if removed, err = c.deleteByCode(txn, loginCode); removed == nil {
+	if removed, err = c.deleteByCode(txn, loginCode); err != nil {
 		// No entry was found, return
+		return
+	} else if removed == nil {
+		err = ErrNoCodeMatchFound
 		return
 	}
 
