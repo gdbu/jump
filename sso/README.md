@@ -1,2 +1,2 @@
-# Queue
-Queue manages the signal queue lists
+# SSO
+SSO manages single sign on
