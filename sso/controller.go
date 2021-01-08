@@ -166,6 +166,18 @@ func (c *Controller) DeleteByUser(ctx context.Context, userID string) (removed *
 	return
 }
 
+// DeleteExpiredInPastHour will remove all entries in the past hour
+func (c *Controller) DeleteExpiredInPastHour(ctx context.Context) (err error) {
+	err = c.m.Transaction(ctx, c.deleteExpiredInPastHour)
+	return
+}
+
+// DeleteExpiredInPastDay will remove all entries in the past day
+func (c *Controller) DeleteExpiredInPastDay(ctx context.Context) (err error) {
+	err = c.m.Transaction(ctx, c.deleteExpiredInPastDay)
+	return
+}
+
 // Transaction will initialize a new R/W transaction
 func (c *Controller) Transaction(ctx context.Context, fn func(txn *Transaction) (err error)) (err error) {
 	err = c.m.Transaction(ctx, func(txn *mojura.Transaction) (err error) {
@@ -238,11 +250,9 @@ func (c *Controller) getByCode(txn *mojura.Transaction, loginCode string) (entry
 }
 
 func (c *Controller) getExpiredWithinPreviousHour(txn *mojura.Transaction) (expired []*Entry, err error) {
-	previousHour := time.Now().Add(time.Hour * -1).UTC()
-	hourFilter := mojura.MakeFilter(RelationshipExpiresAtHours, previousHour.Format("15"), false)
-
+	filter := newExpiredWithinPreviousHourFilter()
 	// Get list of entries which expired during the last hour
-	if err = txn.GetFiltered("", &expired, -1, hourFilter); err != nil {
+	if err = txn.GetFiltered("", &expired, -1, filter); err != nil {
 		return
 	}
 
@@ -250,11 +260,9 @@ func (c *Controller) getExpiredWithinPreviousHour(txn *mojura.Transaction) (expi
 }
 
 func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction) (expired []*Entry, err error) {
-	previousDay := time.Now().Add(time.Hour * 24 * -1).UTC()
-	hourFilter := mojura.MakeFilter(RelationshipExpiresAtDates, previousDay.Format("15"), false)
-
-	// Get list of entries which expired during the last hour
-	if err = txn.GetFiltered("", &expired, -1, hourFilter); err != nil {
+	filter := newExpiredWithinPreviousDayFilter()
+	// Get list of entries which expired during the last day
+	if err = txn.GetFiltered("", &expired, -1, filter); err != nil {
 		return
 	}
 
@@ -312,6 +320,24 @@ func (c *Controller) deleteByCode(txn *mojura.Transaction, loginCode string) (re
 	}
 
 	removed = e
+	return
+}
+
+func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction) (err error) {
+	filter := newExpiredWithinPreviousHourFilter()
+	err = txn.ForEachID("", func(entryID string) (err error) {
+		_, err = c.delete(txn, entryID)
+		return
+	}, filter)
+	return
+}
+
+func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction) (err error) {
+	filter := newExpiredWithinPreviousDayFilter()
+	err = txn.ForEachID("", func(entryID string) (err error) {
+		_, err = c.delete(txn, entryID)
+		return
+	}, filter)
 	return
 }
 

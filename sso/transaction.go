@@ -92,6 +92,15 @@ func (t *Transaction) DeleteByUser(ctx context.Context, userID string) (removed 
 	return t.c.deleteByUser(t.txn, userID)
 }
 
+// DeleteExpiredInPastHour will remove all entries in the past hour
+func (t *Transaction) DeleteExpiredInPastHour(ctx context.Context) (err error) {
+	return t.c.deleteExpiredInPastHour(t.txn)
+}
+
+// DeleteExpiredInPastDay will remove all entries in the past day
+func (t *Transaction) DeleteExpiredInPastDay(ctx context.Context) (err error) {
+	return t.c.deleteExpiredInPastDay(t.txn)
+}
 func (t *Transaction) cleanup() {
 	t.txn = nil
 	t.c = nil
