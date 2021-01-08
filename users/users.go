@@ -117,6 +117,15 @@ func (u *Users) updatePassword(txn *mojura.Transaction, id, password string) (er
 	return
 }
 
+func (u *Users) updateVerified(txn *mojura.Transaction, id string, verified bool) (err error) {
+	err = u.edit(txn, id, func(user *User) (err error) {
+		user.Verified = verified
+		return
+	})
+
+	return
+}
+
 func (u *Users) updateDisabled(txn *mojura.Transaction, id string, disabled bool) (err error) {
 	err = u.edit(txn, id, func(user *User) (err error) {
 		user.Disabled = disabled
@@ -290,6 +299,17 @@ func (u *Users) UpdatePassword(id, password string) (err error) {
 
 	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
 		return u.updatePassword(txn, id, password)
+	}); err != nil {
+		return
+	}
+
+	return
+}
+
+// UpdateVerified will change the user's verified state
+func (u *Users) UpdateVerified(id string, verified bool) (err error) {
+	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+		return u.updateVerified(txn, id, verified)
 	}); err != nil {
 		return
 	}

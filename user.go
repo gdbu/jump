@@ -86,3 +86,12 @@ func (j *Jump) DisableUser(userID string) (err error) {
 
 	return j.sess.InvalidateUser(userID)
 }
+
+// VerifyUser will verify a user
+func (j *Jump) VerifyUser(userID string) (err error) {
+	if err = j.usrs.UpdateVerified(userID, true); err != nil {
+		return
+	}
+
+	return
+}
