@@ -9,6 +9,8 @@ import (
 	"github.com/mojura/mojura"
 )
 
+var testCtx = context.Background()
+
 func TestNew(t *testing.T) {
 	var (
 		c   *Controller
@@ -90,7 +92,7 @@ func TestController_Login(t *testing.T) {
 	}
 
 	var userID string
-	if userID, err = c.Login(e.LoginCode.String()); err != nil {
+	if userID, err = c.Login(testCtx, e.LoginCode.String()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -119,11 +121,11 @@ func TestController_Login_double_login(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err = c.Login(e.LoginCode.String()); err != nil {
+	if _, err = c.Login(testCtx, e.LoginCode.String()); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err = c.Login(e.LoginCode.String()); err != ErrNoCodeMatchFound {
+	if _, err = c.Login(testCtx, e.LoginCode.String()); err != ErrNoCodeMatchFound {
 		t.Fatalf("invalid error, expected <%v> and received <%v>", ErrNoCodeMatchFound, err)
 	}
 }

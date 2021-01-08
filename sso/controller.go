@@ -87,8 +87,8 @@ func (c *Controller) Get(entryID string) (entry *Entry, err error) {
 }
 
 // GetByUser will return an entry for a given user (if it exists)
-func (c *Controller) GetByUser(userID string) (entry *Entry, err error) {
-	err = c.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+func (c *Controller) GetByUser(ctx context.Context, userID string) (entry *Entry, err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
 		entry, err = c.getByUser(txn, userID)
 		return
 	})
@@ -97,8 +97,8 @@ func (c *Controller) GetByUser(userID string) (entry *Entry, err error) {
 }
 
 // GetByCode will return an entry for a given login code (if it exists)
-func (c *Controller) GetByCode(loginCode string) (entry *Entry, err error) {
-	err = c.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+func (c *Controller) GetByCode(ctx context.Context, loginCode string) (entry *Entry, err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
 		entry, err = c.getByCode(txn, loginCode)
 		return
 	})
@@ -107,8 +107,8 @@ func (c *Controller) GetByCode(loginCode string) (entry *Entry, err error) {
 }
 
 // GetExpiredWithinPreviousHour will return a list of entries which expired in the previous hour
-func (c *Controller) GetExpiredWithinPreviousHour() (expired []*Entry, err error) {
-	err = c.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+func (c *Controller) GetExpiredWithinPreviousHour(ctx context.Context) (expired []*Entry, err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
 		expired, err = c.getExpiredWithinPreviousHour(txn)
 		return
 	})
@@ -117,8 +117,8 @@ func (c *Controller) GetExpiredWithinPreviousHour() (expired []*Entry, err error
 }
 
 // GetExpiredWithinPreviousDay will return a list of entries which expired in the previous day
-func (c *Controller) GetExpiredWithinPreviousDay() (expired []*Entry, err error) {
-	err = c.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+func (c *Controller) GetExpiredWithinPreviousDay(ctx context.Context) (expired []*Entry, err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
 		expired, err = c.getExpiredWithinPreviousDay(txn)
 		return
 	})
@@ -127,8 +127,8 @@ func (c *Controller) GetExpiredWithinPreviousDay() (expired []*Entry, err error)
 }
 
 // Login will find a matching entry and return the user ID
-func (c *Controller) Login(loginCode string) (userID string, err error) {
-	err = c.m.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
+func (c *Controller) Login(ctx context.Context, loginCode string) (userID string, err error) {
+	err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
 		userID, err = c.login(txn, loginCode)
 		return
 	})
