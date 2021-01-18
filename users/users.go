@@ -6,6 +6,7 @@ import (
 
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -72,7 +73,9 @@ func (u *Users) getWithFn(id string, fn func(string, mojura.Value) error) (user 
 // getByEmail will return the matching user for the provided email
 func (u *Users) getByEmail(txn *mojura.Transaction, email string) (up *User, err error) {
 	var user User
-	if err = txn.GetFirstByRelationship(relationshipEmails, email, &user); err != nil {
+	filter := filters.Match(relationshipEmails, email)
+	opts := mojura.NewIteratingOpts(filter)
+	if err = txn.GetFirst(&user, opts); err != nil {
 		return
 	}
 
@@ -261,14 +264,14 @@ func (u *Users) GetByEmail(email string) (user *User, err error) {
 
 // ForEach will iterate through all users in the database
 func (u *Users) ForEach(fn func(*User) error) (err error) {
-	err = u.c.ForEach("", func(userID string, val mojura.Value) (err error) {
+	err = u.c.ForEach(func(userID string, val mojura.Value) (err error) {
 		user := val.(*User)
 
 		// Clear password
 		user.Password = ""
 
 		return fn(user)
-	})
+	}, nil)
 
 	return
 }

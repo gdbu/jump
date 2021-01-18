@@ -8,6 +8,7 @@ import (
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -138,9 +139,9 @@ func (c *Controller) Login(ctx context.Context, loginCode string) (userID string
 
 // ForEach will iterate through all Entries
 // Note: The error constant mojura.Break can returned by the iterating func to end the iteration early
-func (c *Controller) ForEach(seekTo string, fn func(*Entry) error, filters ...mojura.Filter) (err error) {
+func (c *Controller) ForEach(fn func(*Entry) error, opts *mojura.IteratingOpts) (err error) {
 	// Iterate through all entries
-	err = c.m.ForEach(seekTo, func(key string, val mojura.Value) (err error) {
+	err = c.m.ForEach(func(key string, val mojura.Value) (err error) {
 		var e *Entry
 		if e, err = asEntry(val); err != nil {
 			return
@@ -148,7 +149,7 @@ func (c *Controller) ForEach(seekTo string, fn func(*Entry) error, filters ...mo
 
 		// Pass iterating Entry to iterating function
 		return fn(e)
-	}, filters...)
+	}, opts)
 
 	return
 }
@@ -236,9 +237,10 @@ func (c *Controller) new(txn *mojura.Transaction, e *Entry) (created *Entry, err
 
 func (c *Controller) getByUser(txn *mojura.Transaction, userID string) (entry *Entry, err error) {
 	var e Entry
-	userFilter := mojura.MakeFilter(RelationshipUsers, userID, false)
+	userFilter := filters.Match(RelationshipUsers, userID)
+	opts := mojura.NewIteratingOpts(userFilter)
 	// Get list of entries which expired during the last hour
-	if err = txn.GetFirst(&e, userFilter); err != nil {
+	if err = txn.GetFirst(&e, opts); err != nil {
 		return
 	}
 
@@ -248,9 +250,10 @@ func (c *Controller) getByUser(txn *mojura.Transaction, userID string) (entry *E
 
 func (c *Controller) getByCode(txn *mojura.Transaction, loginCode string) (entry *Entry, err error) {
 	var e Entry
-	codeFilter := mojura.MakeFilter(RelationshipLoginCodes, loginCode, false)
+	codeFilter := filters.Match(RelationshipLoginCodes, loginCode)
+	opts := mojura.NewIteratingOpts(codeFilter)
 	// Get list of entries which expired during the last hour
-	if err = txn.GetFirst(&e, codeFilter); err != nil {
+	if err = txn.GetFirst(&e, opts); err != nil {
 		return
 	}
 
@@ -260,21 +263,18 @@ func (c *Controller) getByCode(txn *mojura.Transaction, loginCode string) (entry
 
 func (c *Controller) getExpiredWithinPreviousHour(txn *mojura.Transaction) (expired []*Entry, err error) {
 	filter := newExpiredWithinPreviousHourFilter()
+	opts := mojura.NewFilteringOpts(filter)
 	// Get list of entries which expired during the last hour
-	if err = txn.GetFiltered("", &expired, -1, filter); err != nil {
-		return
-	}
-
+	_, err = txn.GetFiltered(&expired, opts)
 	return
 }
 
 func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction) (expired []*Entry, err error) {
 	filter := newExpiredWithinPreviousDayFilter()
-	// Get list of entries which expired during the last day
-	if err = txn.GetFiltered("", &expired, -1, filter); err != nil {
-		return
-	}
+	opts := mojura.NewFilteringOpts(filter)
 
+	// Get list of entries which expired during the last day
+	_, err = txn.GetFiltered(&expired, opts)
 	return
 }
 
@@ -334,19 +334,21 @@ func (c *Controller) deleteByCode(txn *mojura.Transaction, loginCode string) (re
 
 func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction) (err error) {
 	filter := newExpiredWithinPreviousHourFilter()
-	err = txn.ForEachID("", func(entryID string) (err error) {
+	opts := mojura.NewIteratingOpts(filter)
+	err = txn.ForEachID(func(entryID string) (err error) {
 		_, err = c.delete(txn, entryID)
 		return
-	}, filter)
+	}, opts)
 	return
 }
 
 func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction) (err error) {
 	filter := newExpiredWithinPreviousDayFilter()
-	err = txn.ForEachID("", func(entryID string) (err error) {
+	opts := mojura.NewIteratingOpts(filter)
+	err = txn.ForEachID(func(entryID string) (err error) {
 		_, err = c.delete(txn, entryID)
 		return
-	}, filter)
+	}, opts)
 	return
 }
 
