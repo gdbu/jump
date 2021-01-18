@@ -5,6 +5,7 @@ import (
 
 	"github.com/gdbu/stringset"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -124,11 +125,11 @@ func (g *Groups) HasGroup(userID string, group string) (hasGroup bool, err error
 
 // ForEach will iterate through all users in the database
 func (g *Groups) ForEach(seekTo string, fn func(*Entry) error, filters ...mojura.Filter) (err error) {
-	err = g.c.ForEach(seekTo, func(userID string, val mojura.Value) (err error) {
+	opts := mojura.NewIteratingOpts(filters...)
+	err = g.c.ForEach(func(userID string, val mojura.Value) (err error) {
 		entry := val.(*Entry)
 		return fn(entry)
-	}, filters...)
-
+	}, opts)
 	return
 }
 
@@ -173,7 +174,9 @@ func (g *Groups) update(txn *mojura.Transaction, userID string, fn func(*Entry) 
 // get will get an Entry by user ID
 func (g *Groups) get(txn *mojura.Transaction, userID string) (entry *Entry, err error) {
 	var e Entry
-	if err = txn.GetFirst(&e, mojura.MakeFilter(relationshipUsers, userID, false)); err != nil {
+	filter := filters.Match(relationshipUsers, userID)
+	opts := mojura.NewIteratingOpts(filter)
+	if err = txn.GetFirst(&e, opts); err != nil {
 		return
 	}
 

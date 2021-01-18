@@ -67,9 +67,9 @@ func (t *Transaction) Login(loginCode string) (userID string, err error) {
 
 // ForEach will iterate through all Entries
 // Note: The error constant mojura.Break can returned by the iterating func to end the iteration early
-func (t *Transaction) ForEach(seekTo string, fn func(*Entry) error, filters ...mojura.Filter) (err error) {
+func (t *Transaction) ForEach(fn func(*Entry) error, opts *mojura.IteratingOpts) (err error) {
 	// Iterate through all entries
-	err = t.txn.ForEach(seekTo, func(key string, val mojura.Value) (err error) {
+	err = t.txn.ForEach(func(key string, val mojura.Value) (err error) {
 		var e *Entry
 		if e, err = asEntry(val); err != nil {
 			return
@@ -77,7 +77,7 @@ func (t *Transaction) ForEach(seekTo string, fn func(*Entry) error, filters ...m
 
 		// Pass iterating Entry to iterating function
 		return fn(e)
-	}, filters...)
+	}, opts)
 
 	return
 }

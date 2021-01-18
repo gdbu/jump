@@ -6,6 +6,7 @@ import (
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -76,25 +77,24 @@ func (a *APIKeys) New(userID, name string) (key string, err error) {
 	return
 }
 
-// Get will return the APIKey associated with the provided apiKey
+// Get will return the APIKey entry associated with the provided api key value
 func (a *APIKeys) Get(key string) (apiKey *APIKey, err error) {
-	var as []*APIKey
-	if err = a.m.GetByRelationship(relationshipKeys, key, &as); err != nil {
+	var entry APIKey
+	filter := filters.Match(relationshipKeys, key)
+	opts := mojura.NewIteratingOpts(filter)
+	if err = a.m.GetFirst(&entry, opts); err != nil {
 		return
 	}
 
-	if len(as) == 0 {
-		err = ErrAPIKeyNotFound
-		return
-	}
-
-	apiKey = as[0]
+	apiKey = &entry
 	return
 }
 
 // GetByUser will return the APIKeys associated with the provided user id
 func (a *APIKeys) GetByUser(userID string) (apiKeys []*APIKey, err error) {
-	err = a.m.GetByRelationship(relationshipUsers, userID, &apiKeys)
+	filter := filters.Match(relationshipUsers, userID)
+	opts := mojura.NewFilteringOpts(filter)
+	_, err = a.m.GetFiltered(&apiKeys, opts)
 	return
 }
 

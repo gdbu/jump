@@ -9,6 +9,7 @@ import (
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -76,22 +77,21 @@ func (s *Sessions) newSession(key, token, userID string) Session {
 }
 
 func (s *Sessions) getByKey(txn *mojura.Transaction, key string) (sp *Session, err error) {
-	var ss []*Session
-	if err = txn.GetByRelationship(relationshipKeys, key, &ss); err != nil {
+	var entry Session
+	filter := filters.Match(relationshipKeys, key)
+	opts := mojura.NewIteratingOpts(filter)
+	if err = txn.GetFirst(&entry, opts); err != nil {
 		return
 	}
 
-	if len(ss) == 0 {
-		err = mojura.ErrEntryNotFound
-		return
-	}
-
-	sp = ss[0]
+	sp = &entry
 	return
 }
 
 func (s *Sessions) getByUserID(txn *mojura.Transaction, userID string) (ss []*Session, err error) {
-	if err = txn.GetByRelationship(relationshipUsers, userID, &ss); err != nil {
+	filter := filters.Match(relationshipUsers, userID)
+	opts := mojura.NewFilteringOpts(filter)
+	if _, err = txn.GetFiltered(&ss, opts); err != nil {
 		return
 	}
 
@@ -114,16 +114,16 @@ func (s *Sessions) loop() {
 	}
 }
 
-// purge will purge all entries oldest than the oldest value
+// purge will purge all entries older than the oldest value
 func (s *Sessions) purge(txn *mojura.Transaction, oldest int64) (err error) {
-	err = txn.ForEach("", func(sessionID string, val mojura.Value) (err error) {
+	err = txn.ForEach(func(sessionID string, val mojura.Value) (err error) {
 		session := val.(*Session)
 		if session.LastUsedAt >= oldest {
 			return
 		}
 
 		return txn.Remove(sessionID)
-	})
+	}, nil)
 
 	return
 }
