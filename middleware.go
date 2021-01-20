@@ -34,35 +34,27 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 }
 
 // NewSetUserIDMW will set the user id of the currently logged in user
-func (j *Jump) NewSetUserIDMW(redirectOnFail bool) (fn common.Handler) {
+func (j *Jump) NewSetUserIDMW(redirectOnFail, allowNonLoggedIn bool) (fn common.Handler) {
 	return func(ctx common.Context) {
 		var (
 			userID string
 			err    error
 		)
 
-		if apiKey := getAPIKey(ctx); len(apiKey) > 0 {
-			if userID, err = j.getUserIDFromAPIKey(apiKey); err != nil {
-				err = fmt.Errorf("error getting user ID from API key: %v", err)
-			}
-		} else {
-			if userID, err = j.getUserIDFromSession(ctx.Request()); err != nil {
-				err = fmt.Errorf("error getting user ID from session key: %v", err)
-			}
-		}
-
-		if err != nil {
-			if !redirectOnFail {
-				ctx.WriteJSON(401, err)
-				return
-			}
-
+		userID, err = j.getUserIDFromRequest(ctx)
+		switch {
+		case err == nil:
+			// No error occurred, set user ID
+			ctx.Put("userID", userID)
+		case allowNonLoggedIn:
+			// Error occurred, but we are allowing non logged in access, do nothing
+		case redirectOnFail:
+			// Error occurred and redirect on fail flag is set, redirect
 			ctx.Redirect(302, getRedirectURL(ctx))
-			return
+		default:
+			// Error occurred, write as JSON error
+			ctx.WriteJSON(401, err)
 		}
-
-		ctx.Put("userID", userID)
-		return
 	}
 }
 
@@ -102,4 +94,20 @@ func (j *Jump) NewCheckPermissionsMW(resourceName, paramKey string) common.Handl
 			return
 		}
 	}
+}
+
+func (j *Jump) getUserIDFromRequest(ctx common.Context) (userID string, err error) {
+	if apiKey := getAPIKey(ctx); len(apiKey) > 0 {
+		if userID, err = j.getUserIDFromAPIKey(apiKey); err != nil {
+			err = fmt.Errorf("error getting user ID from API key: %v", err)
+			return
+		}
+	}
+
+	if userID, err = j.getUserIDFromSession(ctx.Request()); err != nil {
+		err = fmt.Errorf("error getting user ID from session key: %v", err)
+		return
+	}
+
+	return
 }
