@@ -32,7 +32,7 @@ var relationships = []string{
 	RelationshipExpiresAtHours,
 }
 
-const entryTTL = time.Minute * 15
+const entryTTL = time.Hour
 
 var uuidgen = uuid.NewGenerator()
 
