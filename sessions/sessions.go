@@ -19,7 +19,7 @@ const (
 
 const (
 	// SessionTimeout (in seconds) is the ttl for sessions, an action will refresh the duration
-	SessionTimeout = 60 * 60 * 12 // 12 hours
+	SessionTimeout = 60 * 60 * 24 * 7 // 7 days
 )
 
 var (
