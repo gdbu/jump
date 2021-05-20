@@ -87,11 +87,7 @@ func (c *Controller) New(ctx context.Context, userID string) (created *Entry, er
 		return
 	}
 
-	select {
-	case <-c.updateCh:
-	default:
-	}
-
+	notify(c.updateCh)
 	return
 }
 
@@ -160,22 +156,28 @@ func (c *Controller) GetNextToExpire(ctx context.Context) (next *Entry, err erro
 
 // Login will find a matching entry and return the user ID
 func (c *Controller) Login(ctx context.Context, loginCode string) (userID string, err error) {
-	err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
+	if err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
 		userID, err = c.login(txn, loginCode)
 		return
-	})
+	}); err != nil {
+		return
+	}
 
+	notify(c.updateCh)
 	return
 }
 
 // MultiLogin will find a matching entry and return the user ID
 // Note: This allows for multiple logins for a single code within a 30 second window
 func (c *Controller) MultiLogin(ctx context.Context, loginCode string) (userID string, err error) {
-	err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
+	if err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
 		userID, err = c.multiLogin(txn, loginCode)
 		return
-	})
+	}); err != nil {
+		return
+	}
 
+	notify(c.updateCh)
 	return
 }
 
@@ -419,11 +421,6 @@ func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID st
 		return
 	}
 
-	select {
-	case <-c.updateCh:
-	default:
-	}
-
 	// Get current timestamp
 	now := time.Now()
 
@@ -469,12 +466,6 @@ func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (user
 
 	// Set the return user ID value as the user ID of the deleted entry
 	userID = entry.UserID
-
-	select {
-	case <-c.updateCh:
-	default:
-	}
-
 	return
 }
 
@@ -501,6 +492,11 @@ func (c *Controller) expirationScan() {
 		}
 
 		if wait(next.ExpiresAt, c.updateCh) {
+			continue
+		}
+
+		if _, err = c.Delete(context.Background(), next.ID); err != nil {
+			c.out.Errorf("error deleting next to expire: %v", err)
 			continue
 		}
 	}
