@@ -79,11 +79,18 @@ func (c *Controller) New(ctx context.Context, userID string) (created *Entry, er
 	}
 
 	// Initialize new R/W transaction
-	err = c.m.Transaction(ctx, func(txn *mojura.Transaction) (err error) {
+	if err = c.m.Transaction(ctx, func(txn *mojura.Transaction) (err error) {
 		// Insert entry into DB
 		created, err = c.new(txn, &e)
 		return
-	})
+	}); err != nil {
+		return
+	}
+
+	select {
+	case <-c.updateCh:
+	default:
+	}
 
 	return
 }
@@ -412,6 +419,11 @@ func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID st
 		return
 	}
 
+	select {
+	case <-c.updateCh:
+	default:
+	}
+
 	// Get current timestamp
 	now := time.Now()
 
@@ -457,6 +469,12 @@ func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (user
 
 	// Set the return user ID value as the user ID of the deleted entry
 	userID = entry.UserID
+
+	select {
+	case <-c.updateCh:
+	default:
+	}
+
 	return
 }
 
