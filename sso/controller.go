@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
@@ -18,10 +19,11 @@ const (
 
 // Relationship key const block
 const (
-	RelationshipUsers          = "users"
-	RelationshipLoginCodes     = "loginCodes"
-	RelationshipExpiresAtDates = "expiresAtDates"
-	RelationshipExpiresAtHours = "expiresAtHours"
+	RelationshipUsers               = "users"
+	RelationshipLoginCodes          = "loginCodes"
+	RelationshipExpiresAtDates      = "expiresAtDates"
+	RelationshipExpiresAtHours      = "expiresAtHours"
+	RelationshipExpiresAtTimestamps = "expiresAtTimestamps"
 )
 
 // relationships is a collection of all the supported relationship keys
@@ -30,11 +32,16 @@ var relationships = []string{
 	RelationshipLoginCodes,
 	RelationshipExpiresAtDates,
 	RelationshipExpiresAtHours,
+	RelationshipExpiresAtTimestamps,
 }
 
 const entryTTL = time.Hour
 
 var uuidgen = uuid.NewGenerator()
+
+var (
+	sortByExpiresAt = filters.Comparison(RelationshipExpiresAtTimestamps, yesFilter)
+)
 
 // New will return a new instance of the Controller
 func New(dir string) (cc *Controller, err error) {
@@ -43,6 +50,9 @@ func New(dir string) (cc *Controller, err error) {
 		return
 	}
 
+	c.out = scribe.New("SSO")
+	c.updateCh = make(chan struct{}, 1)
+	go c.expirationScan()
 	// Assign pointer reference to our controller
 	cc = &c
 	return
@@ -50,8 +60,12 @@ func New(dir string) (cc *Controller, err error) {
 
 // Controller represents a management layer to facilitate the retrieval and modification of Entries
 type Controller struct {
+	out *scribe.Scribe
+
 	// Core will manage the data layer and will utilize the underlying back-end
 	m *mojura.Mojura
+
+	updateCh chan struct{}
 }
 
 // New will insert a new Entry to the back-end
@@ -121,6 +135,16 @@ func (c *Controller) GetExpiredWithinPreviousHour(ctx context.Context) (expired 
 func (c *Controller) GetExpiredWithinPreviousDay(ctx context.Context) (expired []*Entry, err error) {
 	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
 		expired, err = c.getExpiredWithinPreviousDay(txn)
+		return
+	})
+
+	return
+}
+
+// GetExpiredWithinPreviousDay will return a list of entries which expired in the previous day
+func (c *Controller) GetNextToExpire(ctx context.Context) (next *Entry, err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction) (err error) {
+		next, err = c.getNextToExpire(txn)
 		return
 	})
 
@@ -289,6 +313,19 @@ func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction) (expir
 	return
 }
 
+func (c *Controller) getNextToExpire(txn *mojura.Transaction) (next *Entry, err error) {
+	opts := mojura.NewIteratingOpts(sortByExpiresAt)
+
+	var e Entry
+	// Get list of entries which expired during the last day
+	if err = txn.GetFirst(&e, opts); err != nil {
+		return
+	}
+
+	next = &e
+	return
+}
+
 func (c *Controller) delete(txn *mojura.Transaction, userID string) (removed *Entry, err error) {
 	var e Entry
 	if err = txn.Get(userID, &e); err != nil {
@@ -421,4 +458,32 @@ func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (user
 	// Set the return user ID value as the user ID of the deleted entry
 	userID = entry.UserID
 	return
+}
+
+func (c *Controller) expirationScan() {
+	var (
+		next *Entry
+		err  error
+	)
+
+	for {
+		next, err = c.GetNextToExpire(context.Background())
+		switch err {
+		case nil:
+		case mojura.ErrEntryNotFound:
+			// Wait for new update to come through update channel
+			<-c.updateCh
+			continue
+
+		default:
+			c.out.Errorf("error getting next to expire: %v", err)
+			// Wait for new update to come through update channel
+			<-c.updateCh
+			continue
+		}
+
+		if wait(next.ExpiresAt, c.updateCh) {
+			continue
+		}
+	}
 }

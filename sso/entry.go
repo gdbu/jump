@@ -1,6 +1,7 @@
 package sso
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gdbu/uuid"
@@ -45,6 +46,8 @@ func (e *Entry) GetRelationships() (r mojura.Relationships) {
 	r.Append(e.ExpiresAt.UTC().Format("2006-01-02"))
 	// Format as hour
 	r.Append(e.ExpiresAt.UTC().Format("15"))
+	// Format as UNIX timestamp
+	r.Append(strconv.FormatInt(e.ExpiresAt.Unix(), 10))
 	return
 }
 
