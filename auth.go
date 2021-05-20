@@ -57,6 +57,21 @@ func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
 	return
 }
 
+// SSOMultiLogin will attempt to login with a provided login code
+// If successful, a key/token pair will be returned to represent the session pair
+// Note: Instead of the login code being instantly destroyed, it now has a 30 second TTL
+// after usage.
+func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string) (err error) {
+	var userID string
+	if userID, err = j.sso.MultiLogin(ctx.Request().Context(), loginCode); err != nil {
+		return
+	}
+
+	err = j.NewSession(ctx, userID)
+	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	return
+}
+
 // Logout is the logout handler
 func (j *Jump) Logout(ctx common.Context) (err error) {
 	userID := ctx.Get("userID")
