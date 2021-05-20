@@ -60,3 +60,10 @@ func wait(waitUntil time.Time, ch chan struct{}) (cancelled bool) {
 
 	}
 }
+
+func notify(ch chan struct{}) {
+	select {
+	case ch <- struct{}{}:
+	default:
+	}
+}
