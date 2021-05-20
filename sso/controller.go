@@ -137,6 +137,17 @@ func (c *Controller) Login(ctx context.Context, loginCode string) (userID string
 	return
 }
 
+// MultiLogin will find a matching entry and return the user ID
+// Note: This allows for multiple logins for a single code within a 30 second window
+func (c *Controller) MultiLogin(ctx context.Context, loginCode string) (userID string, err error) {
+	err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
+		userID, err = c.multiLogin(txn, loginCode)
+		return
+	})
+
+	return
+}
+
 // ForEach will iterate through all Entries
 // Note: The error constant mojura.Break can returned by the iterating func to end the iteration early
 func (c *Controller) ForEach(fn func(*Entry) error, opts *mojura.IteratingOpts) (err error) {
@@ -375,5 +386,39 @@ func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID st
 
 	// Set the return user ID value as the user ID of the deleted entry
 	userID = removed.UserID
+	return
+}
+
+// multiLogin will allow multiple logins through a single code
+func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (userID string, err error) {
+	var entry *Entry
+	// Remove entry which matches the login code
+	if entry, err = c.getByCode(txn, loginCode); err != nil {
+		// No entry was found, return
+		return
+	} else if entry == nil {
+		err = ErrNoCodeMatchFound
+		return
+	}
+
+	// Get current timestamp
+	now := time.Now()
+
+	// Check to see if entry has expired
+	if now.After(entry.ExpiresAt) {
+		err = fmt.Errorf("cannot login, entry expired at: %v", entry.ExpiresAt)
+		return
+	}
+
+	newExpiration := now.Add(time.Second * 30)
+	if entry.ExpiresAt.After(newExpiration) {
+		entry.ExpiresAt = newExpiration
+		if err = txn.Edit(entry.ID, entry); err != nil {
+			return
+		}
+	}
+
+	// Set the return user ID value as the user ID of the deleted entry
+	userID = entry.UserID
 	return
 }
