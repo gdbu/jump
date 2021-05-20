@@ -169,9 +169,9 @@ func (c *Controller) Login(ctx context.Context, loginCode string) (userID string
 
 // MultiLogin will find a matching entry and return the user ID
 // Note: This allows for multiple logins for a single code within a 30 second window
-func (c *Controller) MultiLogin(ctx context.Context, loginCode string) (userID string, err error) {
+func (c *Controller) MultiLogin(ctx context.Context, loginCode string, ttl time.Duration) (userID string, err error) {
 	if err = c.m.Batch(ctx, func(txn *mojura.Transaction) (err error) {
-		userID, err = c.multiLogin(txn, loginCode)
+		userID, err = c.multiLogin(txn, loginCode, ttl)
 		return
 	}); err != nil {
 		return
@@ -436,7 +436,7 @@ func (c *Controller) login(txn *mojura.Transaction, loginCode string) (userID st
 }
 
 // multiLogin will allow multiple logins through a single code
-func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (userID string, err error) {
+func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string, ttl time.Duration) (userID string, err error) {
 	var entry *Entry
 	// Remove entry which matches the login code
 	if entry, err = c.getByCode(txn, loginCode); err != nil {
@@ -456,7 +456,7 @@ func (c *Controller) multiLogin(txn *mojura.Transaction, loginCode string) (user
 		return
 	}
 
-	newExpiration := now.Add(time.Second * 30)
+	newExpiration := now.Add(ttl)
 	if entry.ExpiresAt.After(newExpiration) {
 		entry.ExpiresAt = newExpiration
 		if err = txn.Edit(entry.ID, entry); err != nil {

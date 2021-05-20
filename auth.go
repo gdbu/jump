@@ -61,9 +61,9 @@ func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
 // If successful, a key/token pair will be returned to represent the session pair
 // Note: Instead of the login code being instantly destroyed, it now has a 30 second TTL
 // after usage.
-func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string) (err error) {
+func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string, ttl time.Duration) (err error) {
 	var userID string
-	if userID, err = j.sso.MultiLogin(ctx.Request().Context(), loginCode); err != nil {
+	if userID, err = j.sso.MultiLogin(ctx.Request().Context(), loginCode, ttl); err != nil {
 		return
 	}
 
