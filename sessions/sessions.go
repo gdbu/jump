@@ -23,10 +23,6 @@ const (
 	SessionTimeout = 60 * 60 * 24 * 7 // 7 days
 )
 
-var (
-	sessionsBktKey = []byte("sessions")
-)
-
 const (
 	relationshipKeys  = "keys"
 	relationshipUsers = "users"

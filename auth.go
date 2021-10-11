@@ -23,8 +23,14 @@ func (j *Jump) Login(ctx common.Context, email, password string) (userID string,
 		return
 	}
 
-	err = j.NewSession(ctx, userID)
-	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	if err = j.NewSession(ctx, userID); err != nil {
+		return
+	}
+
+	if err = j.setLastLoggedInAt(userID, time.Now().Unix()); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -52,8 +58,14 @@ func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
 		return
 	}
 
-	err = j.NewSession(ctx, userID)
-	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	if err = j.NewSession(ctx, userID); err != nil {
+		return
+	}
+
+	if err = j.setLastLoggedInAt(userID, time.Now().Unix()); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -67,8 +79,14 @@ func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string, ttl time.Dura
 		return
 	}
 
-	err = j.NewSession(ctx, userID)
-	err = j.setLastLoggedInAt(userID, time.Now().Unix())
+	if err = j.NewSession(ctx, userID); err != nil {
+		return
+	}
+
+	if err = j.setLastLoggedInAt(userID, time.Now().Unix()); err != nil {
+		return
+	}
+
 	return
 }
 

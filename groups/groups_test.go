@@ -4,13 +4,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/hatchify/errors"
-)
-
-const (
-	testErrCannot = errors.Error("group not allowed to perform action they should be able to")
-	testErrCan    = errors.Error("group allowed to perform action they should not be able to")
 )
 
 const (

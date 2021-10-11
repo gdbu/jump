@@ -29,7 +29,6 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 
 		hook := j.newPermissionHook(userID, resourceName, actions, adminActions)
 		ctx.AddHook(hook)
-		return
 	}
 }
 

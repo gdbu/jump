@@ -24,7 +24,5 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 		if err = j.SetPermission(resourceKey, userID, actions, adminActions); err != nil {
 			j.out.Errorf("Error setting permissons for %s / %s: %v", userID, resourceName, err)
 		}
-
-		return
 	}
 }

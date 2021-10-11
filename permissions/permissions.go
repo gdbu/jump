@@ -204,7 +204,6 @@ func (p *Permissions) Transaction(fn func(*Transaction) error) (err error) {
 // SetGroups will set the groups controller
 func (p *Permissions) SetGroups(g *groups.Groups) {
 	p.g = g
-	return
 }
 
 // Close will close permissions

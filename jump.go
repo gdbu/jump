@@ -25,10 +25,7 @@ const (
 )
 
 const (
-	permR   = permissions.ActionRead
-	permRW  = permissions.ActionRead | permissions.ActionWrite
 	permRWD = permissions.ActionRead | permissions.ActionWrite | permissions.ActionDelete
-	permWD  = permissions.ActionWrite | permissions.ActionDelete
 )
 
 const (
