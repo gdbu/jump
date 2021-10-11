@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gdbu/stringset"
+	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -19,9 +20,14 @@ var relationships = []string{
 }
 
 // New will return a new instance of users
-func New(dir string) (gp *Groups, err error) {
+func New(dir string, exporter kiroku.Exporter) (gp *Groups, err error) {
+	var opts mojura.Opts
+	opts.Name = "usergroups"
+	opts.Dir = dir
+	opts.Exporter = exporter
+
 	var g Groups
-	if g.c, err = mojura.New("usergroups", dir, &Entry{}, relationships...); err != nil {
+	if g.c, err = mojura.New(opts, &Entry{}, relationships...); err != nil {
 		return
 	}
 

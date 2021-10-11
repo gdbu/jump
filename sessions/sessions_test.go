@@ -22,7 +22,7 @@ func TestSessions(t *testing.T) {
 	}
 	defer os.RemoveAll("./test_data")
 
-	if s, err = New("./test_data"); err != nil {
+	if s, err = New("./test_data", nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -65,7 +65,7 @@ func TestSessions(t *testing.T) {
 	}
 
 	// Re-open sessions from snapshot
-	if s, err = New("./test_data"); err != nil {
+	if s, err = New("./test_data", nil); err != nil {
 		t.Fatal(err)
 	}
 

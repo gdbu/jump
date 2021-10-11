@@ -31,11 +31,11 @@ func TestPermissions(t *testing.T) {
 	}
 	defer os.RemoveAll("./_testdata")
 
-	if p, err = New("./_testdata"); err != nil {
+	if p, err = New("./_testdata", nil); err != nil {
 		t.Fatal(err)
 	}
 
-	if g, err = groups.New("./_testdata"); err != nil {
+	if g, err = groups.New("./_testdata", nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -71,7 +71,7 @@ func TestPermissions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if p, err = New("./_testdata"); err != nil {
+	if p, err = New("./_testdata", nil); err != nil {
 		t.Fatal(err)
 	}
 

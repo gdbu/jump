@@ -5,6 +5,7 @@ import (
 
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
+	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -30,9 +31,14 @@ var (
 )
 
 // New will return a new instance of APIKeys
-func New(dir string) (ap *APIKeys, err error) {
+func New(dir string, exporter kiroku.Exporter) (ap *APIKeys, err error) {
+	var opts mojura.Opts
+	opts.Name = "apikeys"
+	opts.Dir = dir
+	opts.Exporter = exporter
+
 	var a APIKeys
-	if a.m, err = mojura.New("apikeys", dir, &APIKey{}, relationships...); err != nil {
+	if a.m, err = mojura.New(opts, &APIKey{}, relationships...); err != nil {
 		return
 	}
 

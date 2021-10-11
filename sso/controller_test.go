@@ -135,7 +135,7 @@ func testInit() (c *Controller, err error) {
 		return
 	}
 
-	return New("./test_data")
+	return New("./test_data", nil)
 }
 
 func testTeardown(c *Controller) (err error) {

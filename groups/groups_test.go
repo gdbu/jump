@@ -30,7 +30,7 @@ func TestGroups(t *testing.T) {
 	}
 	defer os.RemoveAll("./_testdata")
 
-	if g, err = New("./_testdata"); err != nil {
+	if g, err = New("./_testdata", nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -52,7 +52,7 @@ func TestGroups(t *testing.T) {
 		t.Error(err)
 	}
 
-	if g, err = New("./_testdata"); err != nil {
+	if g, err = New("./_testdata", nil); err != nil {
 		t.Fatal(err)
 	}
 

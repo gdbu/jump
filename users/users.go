@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hatchify/errors"
+	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -24,8 +25,6 @@ const (
 	ErrEmailExists = errors.Error("email is already associated with a user")
 	// ErrUserIsDisabled is returned when a user is disabled
 	ErrUserIsDisabled = errors.Error("user is disabled")
-
-	errBreak = errors.Error("jump break")
 )
 
 const (
@@ -35,9 +34,14 @@ const (
 var relationships = []string{relationshipEmails}
 
 // New will return a new instance of users
-func New(dir string) (up *Users, err error) {
+func New(dir string, exporter kiroku.Exporter) (up *Users, err error) {
+	var opts mojura.Opts
+	opts.Name = "users"
+	opts.Dir = dir
+	opts.Exporter = exporter
+
 	var u Users
-	if u.c, err = mojura.New("users", dir, &User{}, relationships...); err != nil {
+	if u.c, err = mojura.New(opts, &User{}, relationships...); err != nil {
 		return
 	}
 

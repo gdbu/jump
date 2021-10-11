@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gdbu/scribe"
+	"github.com/mojura/kiroku"
 
 	"github.com/hatchify/errors"
 
@@ -38,30 +39,30 @@ const (
 )
 
 // New will return a new instance of Jump
-func New(dir string) (jp *Jump, err error) {
+func New(dir string, exporter kiroku.Exporter) (jp *Jump, err error) {
 	var j Jump
 	j.out = scribe.New("Jump")
-	if j.perm, err = permissions.New(dir); err != nil {
+	if j.perm, err = permissions.New(dir, exporter); err != nil {
 		return
 	}
 
-	if j.sess, err = sessions.New(dir); err != nil {
+	if j.sess, err = sessions.New(dir, exporter); err != nil {
 		return
 	}
 
-	if j.api, err = apikeys.New(dir); err != nil {
+	if j.api, err = apikeys.New(dir, exporter); err != nil {
 		return
 	}
 
-	if j.usrs, err = users.New(dir); err != nil {
+	if j.usrs, err = users.New(dir, exporter); err != nil {
 		return
 	}
 
-	if j.grps, err = groups.New(dir); err != nil {
+	if j.grps, err = groups.New(dir, exporter); err != nil {
 		return
 	}
 
-	if j.sso, err = sso.New(dir); err != nil {
+	if j.sso, err = sso.New(dir, exporter); err != nil {
 		return
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
+	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -36,10 +37,15 @@ var (
 )
 
 // New will return a new instance of sessions
-func New(dir string) (sp *Sessions, err error) {
+func New(dir string, exporter kiroku.Exporter) (sp *Sessions, err error) {
+	var opts mojura.Opts
+	opts.Name = "sessions"
+	opts.Dir = dir
+	opts.Exporter = exporter
+
 	var s Sessions
 	s.out = scribe.New("Sessions")
-	if s.c, err = mojura.New("sessions", dir, &Session{}, relationships...); err != nil {
+	if s.c, err = mojura.New(opts, &Session{}, relationships...); err != nil {
 		return
 	}
 
