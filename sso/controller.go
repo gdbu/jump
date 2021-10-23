@@ -45,11 +45,11 @@ var (
 )
 
 // New will return a new instance of the Controller
-func New(dir string, exporter kiroku.Exporter) (cc *Controller, err error) {
+func New(dir string, source kiroku.Source) (cc *Controller, err error) {
 	var opts mojura.Opts
 	opts.Name = "sso"
 	opts.Dir = dir
-	opts.Exporter = exporter
+	opts.Source = source
 
 	var c Controller
 	if c.m, err = mojura.New(opts, &Entry{}, relationships...); err != nil {

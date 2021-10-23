@@ -33,11 +33,11 @@ var (
 )
 
 // New will return a new instance of sessions
-func New(dir string, exporter kiroku.Exporter) (sp *Sessions, err error) {
+func New(dir string, source kiroku.Source) (sp *Sessions, err error) {
 	var opts mojura.Opts
 	opts.Name = "sessions"
 	opts.Dir = dir
-	opts.Exporter = exporter
+	opts.Source = source
 
 	var s Sessions
 	s.out = scribe.New("Sessions")

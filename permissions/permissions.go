@@ -23,11 +23,11 @@ const (
 )
 
 // New will return a new instance of Permissions
-func New(dir string, exporter kiroku.Exporter) (pp *Permissions, err error) {
+func New(dir string, source kiroku.Source) (pp *Permissions, err error) {
 	var opts mojura.Opts
 	opts.Name = "permissions"
 	opts.Dir = dir
-	opts.Exporter = exporter
+	opts.Source = source
 
 	var p Permissions
 	if p.c, err = mojura.New(opts, &Resource{}, relationshipResourceKeys); err != nil {

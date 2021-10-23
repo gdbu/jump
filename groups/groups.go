@@ -20,11 +20,11 @@ var relationships = []string{
 }
 
 // New will return a new instance of users
-func New(dir string, exporter kiroku.Exporter) (gp *Groups, err error) {
+func New(dir string, source kiroku.Source) (gp *Groups, err error) {
 	var opts mojura.Opts
 	opts.Name = "usergroups"
 	opts.Dir = dir
-	opts.Exporter = exporter
+	opts.Source = source
 
 	var g Groups
 	if g.c, err = mojura.New(opts, &Entry{}, relationships...); err != nil {
