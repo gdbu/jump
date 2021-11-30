@@ -18,5 +18,6 @@ func (j *Jump) NewSession(ctx common.Context, userID string) (err error) {
 
 	http.SetCookie(ctx.Writer(), &keyC)
 	http.SetCookie(ctx.Writer(), &tokenC)
+	ctx.Put("userID", userID)
 	return
 }
