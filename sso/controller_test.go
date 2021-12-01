@@ -136,7 +136,7 @@ func testInit() (c *Controller, err error) {
 	}
 
 	var opts mojura.Opts
-	opts.Dir = "./_testdata"
+	opts.Dir = "./test_data"
 	return New(opts)
 }
 

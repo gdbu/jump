@@ -20,13 +20,13 @@ func TestGroups(t *testing.T) {
 		err error
 	)
 
-	if err = os.MkdirAll("./_testdata", 0744); err != nil {
+	if err = os.MkdirAll("./test_data", 0744); err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll("./_testdata")
+	defer os.RemoveAll("./test_data")
 
 	var opts mojura.Opts
-	opts.Dir = "./_testdata"
+	opts.Dir = "./test_data"
 	if g, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
