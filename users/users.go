@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hatchify/errors"
-	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -34,12 +33,8 @@ const (
 var relationships = []string{relationshipEmails}
 
 // New will return a new instance of users
-func New(dir string, source kiroku.Source, isMirror bool) (up *Users, err error) {
-	var opts mojura.Opts
+func New(opts mojura.Opts) (up *Users, err error) {
 	opts.Name = "users"
-	opts.Dir = dir
-	opts.Source = source
-	opts.IsMirror = isMirror
 
 	var u Users
 	if u.c, err = mojura.New(opts, &User{}, relationships...); err != nil {

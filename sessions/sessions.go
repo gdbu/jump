@@ -8,7 +8,6 @@ import (
 	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
-	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -33,12 +32,8 @@ var (
 )
 
 // New will return a new instance of sessions
-func New(dir string, source kiroku.Source, isMirror bool) (sp *Sessions, err error) {
-	var opts mojura.Opts
+func New(opts mojura.Opts) (sp *Sessions, err error) {
 	opts.Name = "sessions"
-	opts.Dir = dir
-	opts.Source = source
-	opts.IsMirror = isMirror
 
 	var s Sessions
 	s.out = scribe.New("Sessions")
@@ -48,7 +43,7 @@ func New(dir string, source kiroku.Source, isMirror bool) (sp *Sessions, err err
 
 	s.g = uuid.NewGenerator()
 
-	if !isMirror {
+	if !opts.IsMirror {
 		// Start purge loop
 		go s.loop()
 	}

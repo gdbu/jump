@@ -5,7 +5,6 @@ import (
 
 	"github.com/gdbu/jump/groups"
 	"github.com/hatchify/errors"
-	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 )
 
@@ -23,12 +22,8 @@ const (
 )
 
 // New will return a new instance of Permissions
-func New(dir string, source kiroku.Source, isMirror bool) (pp *Permissions, err error) {
-	var opts mojura.Opts
+func New(opts mojura.Opts) (pp *Permissions, err error) {
 	opts.Name = "permissions"
-	opts.Dir = dir
-	opts.Source = source
-	opts.IsMirror = isMirror
 
 	var p Permissions
 	if p.c, err = mojura.New(opts, &Resource{}, relationshipResourceKeys); err != nil {

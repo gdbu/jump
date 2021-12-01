@@ -5,7 +5,6 @@ import (
 
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
-	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -31,12 +30,8 @@ var (
 )
 
 // New will return a new instance of APIKeys
-func New(dir string, source kiroku.Source, isMirror bool) (ap *APIKeys, err error) {
-	var opts mojura.Opts
+func New(opts mojura.Opts) (ap *APIKeys, err error) {
 	opts.Name = "apikeys"
-	opts.Dir = dir
-	opts.Source = source
-	opts.IsMirror = isMirror
 
 	var a APIKeys
 	if a.m, err = mojura.New(opts, &APIKey{}, relationships...); err != nil {

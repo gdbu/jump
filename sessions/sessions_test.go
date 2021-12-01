@@ -3,6 +3,8 @@ package sessions
 import (
 	"os"
 	"testing"
+
+	"github.com/mojura/mojura"
 )
 
 const (
@@ -22,7 +24,9 @@ func TestSessions(t *testing.T) {
 	}
 	defer os.RemoveAll("./test_data")
 
-	if s, err = New("./test_data", nil); err != nil {
+	var opts mojura.Opts
+	opts.Dir = "./_testdata"
+	if s, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -65,7 +69,7 @@ func TestSessions(t *testing.T) {
 	}
 
 	// Re-open sessions from snapshot
-	if s, err = New("./test_data", nil); err != nil {
+	if s, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdbu/jump/groups"
 	"github.com/hatchify/errors"
+	"github.com/mojura/mojura"
 )
 
 const (
@@ -31,11 +32,13 @@ func TestPermissions(t *testing.T) {
 	}
 	defer os.RemoveAll("./_testdata")
 
-	if p, err = New("./_testdata", nil); err != nil {
+	var opts mojura.Opts
+	opts.Dir = "./_testdata"
+	if p, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 
-	if g, err = groups.New("./_testdata", nil); err != nil {
+	if g, err = groups.New(opts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -71,7 +74,7 @@ func TestPermissions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if p, err = New("./_testdata", nil); err != nil {
+	if p, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 

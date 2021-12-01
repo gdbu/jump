@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/mojura/mojura"
 )
 
 const (
@@ -23,7 +25,9 @@ func TestGroups(t *testing.T) {
 	}
 	defer os.RemoveAll("./_testdata")
 
-	if g, err = New("./_testdata", nil); err != nil {
+	var opts mojura.Opts
+	opts.Dir = "./_testdata"
+	if g, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -45,7 +49,7 @@ func TestGroups(t *testing.T) {
 		t.Error(err)
 	}
 
-	if g, err = New("./_testdata", nil); err != nil {
+	if g, err = New(opts); err != nil {
 		t.Fatal(err)
 	}
 

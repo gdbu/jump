@@ -8,7 +8,6 @@ import (
 	"github.com/gdbu/scribe"
 	"github.com/gdbu/uuid"
 	"github.com/hatchify/errors"
-	"github.com/mojura/kiroku"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -45,12 +44,8 @@ var (
 )
 
 // New will return a new instance of the Controller
-func New(dir string, source kiroku.Source, isMirror bool) (cc *Controller, err error) {
-	var opts mojura.Opts
+func New(opts mojura.Opts) (cc *Controller, err error) {
 	opts.Name = "sso"
-	opts.Dir = dir
-	opts.Source = source
-	opts.IsMirror = isMirror
 
 	var c Controller
 	if c.m, err = mojura.New(opts, &Entry{}, relationships...); err != nil {
