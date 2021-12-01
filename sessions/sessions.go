@@ -33,11 +33,12 @@ var (
 )
 
 // New will return a new instance of sessions
-func New(dir string, source kiroku.Source) (sp *Sessions, err error) {
+func New(dir string, source kiroku.Source, isMirror bool) (sp *Sessions, err error) {
 	var opts mojura.Opts
 	opts.Name = "sessions"
 	opts.Dir = dir
 	opts.Source = source
+	opts.IsMirror = isMirror
 
 	var s Sessions
 	s.out = scribe.New("Sessions")

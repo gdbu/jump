@@ -45,11 +45,12 @@ var (
 )
 
 // New will return a new instance of the Controller
-func New(dir string, source kiroku.Source) (cc *Controller, err error) {
+func New(dir string, source kiroku.Source, isMirror bool) (cc *Controller, err error) {
 	var opts mojura.Opts
 	opts.Name = "sso"
 	opts.Dir = dir
 	opts.Source = source
+	opts.IsMirror = isMirror
 
 	var c Controller
 	if c.m, err = mojura.New(opts, &Entry{}, relationships...); err != nil {
