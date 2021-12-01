@@ -48,8 +48,11 @@ func New(dir string, source kiroku.Source, isMirror bool) (sp *Sessions, err err
 
 	s.g = uuid.NewGenerator()
 
-	// Start purge loop
-	go s.loop()
+	if !isMirror {
+		// Start purge loop
+		go s.loop()
+	}
+
 	sp = &s
 	return
 }
