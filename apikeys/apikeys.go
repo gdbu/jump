@@ -31,11 +31,12 @@ var (
 )
 
 // New will return a new instance of APIKeys
-func New(dir string, source kiroku.Source) (ap *APIKeys, err error) {
+func New(dir string, source kiroku.Source, isMirror bool) (ap *APIKeys, err error) {
 	var opts mojura.Opts
 	opts.Name = "apikeys"
 	opts.Dir = dir
 	opts.Source = source
+	opts.IsMirror = isMirror
 
 	var a APIKeys
 	if a.m, err = mojura.New(opts, &APIKey{}, relationships...); err != nil {

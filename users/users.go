@@ -34,11 +34,12 @@ const (
 var relationships = []string{relationshipEmails}
 
 // New will return a new instance of users
-func New(dir string, source kiroku.Source) (up *Users, err error) {
+func New(dir string, source kiroku.Source, isMirror bool) (up *Users, err error) {
 	var opts mojura.Opts
 	opts.Name = "users"
 	opts.Dir = dir
 	opts.Source = source
+	opts.IsMirror = isMirror
 
 	var u Users
 	if u.c, err = mojura.New(opts, &User{}, relationships...); err != nil {
