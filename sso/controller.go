@@ -54,6 +54,7 @@ func New(opts mojura.Opts) (cc *Controller, err error) {
 
 	c.out = scribe.New("SSO")
 	c.updateCh = make(chan struct{}, 1)
+	c.ctx, c.cancel = context.WithCancel(context.Background())
 	go c.expirationScan()
 	// Assign pointer reference to our controller
 	cc = &c
@@ -68,6 +69,9 @@ type Controller struct {
 	m *mojura.Mojura
 
 	updateCh chan struct{}
+
+	ctx    context.Context
+	cancel func()
 }
 
 // New will insert a new Entry to the back-end
@@ -256,6 +260,7 @@ func (c *Controller) ReadTransaction(ctx context.Context, fn func(txn *Transacti
 
 // Close will close the controller and it's underlying dependencies
 func (c *Controller) Close() (err error) {
+	c.cancel()
 	// Since we only have one dependency, we can just call this func directly
 	return c.m.Close()
 }
@@ -478,7 +483,13 @@ func (c *Controller) expirationScan() {
 	)
 
 	for {
-		next, err = c.GetNextToExpire(context.Background())
+		select {
+		case <-c.ctx.Done():
+			return
+		default:
+		}
+
+		next, err = c.GetNextToExpire(c.ctx)
 		switch err {
 		case nil:
 		case mojura.ErrEntryNotFound:
