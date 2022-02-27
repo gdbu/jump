@@ -101,6 +101,8 @@ func (j *Jump) getUserIDFromRequest(ctx common.Context) (userID string, err erro
 			err = fmt.Errorf("error getting user ID from API key: %v", err)
 			return
 		}
+
+		return
 	}
 
 	if userID, err = j.getUserIDFromSession(ctx.Request()); err != nil {
