@@ -20,7 +20,6 @@ const (
 const (
 	// SessionTimeout (in seconds) is the ttl for sessions, an action will refresh the duration
 	SessionTimeout = 60 * 60 * 24 * 7 // 7 days
-	RefreshPeriod  = 60 * 60 * 24     // 1 day
 )
 
 const (
@@ -185,17 +184,6 @@ func (s *Sessions) Get(key, token string) (sp *Session, err error) {
 
 		return
 	})
-
-	now := time.Now().Unix()
-	delta := now - sp.LastUsedAt
-	if delta > RefreshPeriod {
-		return
-	}
-
-	if err = s.Refesh(key, token); err != nil {
-		sp = nil
-		return
-	}
 
 	return
 }
