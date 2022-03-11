@@ -20,6 +20,7 @@ const (
 const (
 	// SessionTimeout (in seconds) is the ttl for sessions, an action will refresh the duration
 	SessionTimeout = 60 * 60 * 24 * 7 // 7 days
+	RefreshPeriod  = 60 * 60 * 24     // 1 day
 )
 
 const (
@@ -175,6 +176,33 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 
 // Get will retrieve the user id associated with a provided key/token pair
 func (s *Sessions) Get(key, token string) (userID string, err error) {
+	var sp *Session
+	// Create session key from the key/token pair
+	sessionKey := newSessionKey(key, token)
+	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+		if sp, err = s.getByKey(txn, sessionKey); err != nil {
+			return
+		}
+
+		return
+	})
+
+	now := time.Now().Unix()
+	delta := now - sp.LastUsedAt
+	if delta > RefreshPeriod {
+		return
+	}
+
+	if err = s.Refesh(key, token); err != nil {
+		return
+	}
+
+	userID = sp.UserID
+	return
+}
+
+// Refesh will refresh a session
+func (s *Sessions) Refesh(key, token string) (err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
 	err = s.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
@@ -183,8 +211,6 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 			return
 		}
 
-		// Set uuid as session uuid
-		userID = sp.UserID
 		// Set last action for session
 		sp.setAction()
 		return txn.Edit(sp.ID, sp)
