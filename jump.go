@@ -113,7 +113,13 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 		return
 	}
 
-	return j.sess.Get(key.Value, token.Value)
+	var sess *sessions.Session
+	if sess, err = j.sess.Get(key.Value, token.Value); err != nil {
+		return
+	}
+
+	userID = sess.UserID
+	return
 }
 
 // Permissions will return the underlying permissions

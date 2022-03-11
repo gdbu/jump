@@ -45,23 +45,23 @@ func TestSessions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var mu string
+	var mu *Session
 	if mu, err = s.Get(tu1k, tu1t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser1 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser1, mu)
+	} else if mu.UserID != testUser1 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser1, mu.UserID)
 	}
 
 	if mu, err = s.Get(tu2k, tu2t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser2 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser2, mu)
+	} else if mu.UserID != testUser2 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser2, mu.UserID)
 	}
 
 	if mu, err = s.Get(tu3k, tu3t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser3 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser3, mu)
+	} else if mu.UserID != testUser3 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser3, mu.UserID)
 	}
 
 	if err = s.Close(); err != nil {
@@ -77,19 +77,19 @@ func TestSessions(t *testing.T) {
 
 	if mu, err = s.Get(tu1k, tu1t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser1 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser1, mu)
+	} else if mu.UserID != testUser1 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser1, mu.UserID)
 	}
 
 	if mu, err = s.Get(tu2k, tu2t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser2 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser2, mu)
+	} else if mu.UserID != testUser2 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser2, mu.UserID)
 	}
 
 	if mu, err = s.Get(tu3k, tu3t); err != nil {
 		t.Fatal(err)
-	} else if mu != testUser3 {
-		t.Fatalf("invalid user match, expected %s and received %s", testUser3, mu)
+	} else if mu.UserID != testUser3 {
+		t.Fatalf("invalid user match, expected %s and received %s", testUser3, mu.UserID)
 	}
 }

@@ -175,8 +175,7 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 }
 
 // Get will retrieve the user id associated with a provided key/token pair
-func (s *Sessions) Get(key, token string) (userID string, err error) {
-	var sp *Session
+func (s *Sessions) Get(key, token string) (sp *Session, err error) {
 	// Create session key from the key/token pair
 	sessionKey := newSessionKey(key, token)
 	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
@@ -194,10 +193,10 @@ func (s *Sessions) Get(key, token string) (userID string, err error) {
 	}
 
 	if err = s.Refesh(key, token); err != nil {
+		sp = nil
 		return
 	}
 
-	userID = sp.UserID
 	return
 }
 
