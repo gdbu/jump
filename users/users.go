@@ -362,6 +362,25 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 	return
 }
 
+// Get will get the user which matches the ID
+func (u *Users) Remove(id string) (removed *User, err error) {
+	err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+		var user User
+		if err = txn.Get(id, &user); err != nil {
+			return
+		}
+
+		if err = txn.Remove(id); err != nil {
+			return
+		}
+
+		removed = &user
+		return
+	})
+
+	return
+}
+
 // Close will close the selected instance of users
 func (u *Users) Close() (err error) {
 	return u.c.Close()
