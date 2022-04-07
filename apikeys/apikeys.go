@@ -53,16 +53,6 @@ type APIKeys struct {
 	gen *uuid.Generator
 }
 
-func (a *APIKeys) updateName(txn *mojura.Transaction, apiKey, name string) (err error) {
-	var key APIKey
-	if err = txn.Get(apiKey, &key); err != nil {
-		return
-	}
-
-	key.Name = name
-	return txn.Edit(apiKey, &key)
-}
-
 // New will create a new apiKey and return the associated ID
 func (a *APIKeys) New(userID, name string) (key string, err error) {
 	uuid := a.gen.New()
@@ -81,14 +71,11 @@ func (a *APIKeys) New(userID, name string) (key string, err error) {
 
 // Get will return the APIKey entry associated with the provided api key value
 func (a *APIKeys) Get(key string) (apiKey *APIKey, err error) {
-	var entry APIKey
-	filter := filters.Match(relationshipKeys, key)
-	opts := mojura.NewIteratingOpts(filter)
-	if err = a.m.GetFirst(&entry, opts); err != nil {
+	err = a.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+		apiKey, err = a.get(txn, key)
 		return
-	}
+	})
 
-	apiKey = &entry
 	return
 }
 
@@ -110,11 +97,52 @@ func (a *APIKeys) UpdateName(apiKey, name string) (err error) {
 }
 
 // Remove will delete an apiKey
-func (a *APIKeys) Remove(apiKey string) (err error) {
-	return a.m.Remove(apiKey)
+func (a *APIKeys) Remove(apiKey string) (removed *APIKey, err error) {
+	err = a.m.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+		removed, err = a.remove(txn, apiKey)
+		return
+	})
+
+	return
 }
 
 // Close will close the apiKeys service
 func (a *APIKeys) Close() (err error) {
 	return a.m.Close()
+}
+
+func (a *APIKeys) get(txn *mojura.Transaction, key string) (apiKey *APIKey, err error) {
+	var entry APIKey
+	filter := filters.Match(relationshipKeys, key)
+	opts := mojura.NewIteratingOpts(filter)
+	if err = txn.GetFirst(&entry, opts); err != nil {
+		return
+	}
+
+	apiKey = &entry
+	return
+}
+
+func (a *APIKeys) updateName(txn *mojura.Transaction, apiKey, name string) (err error) {
+	var match *APIKey
+	if match, err = a.get(txn, apiKey); err != nil {
+		return
+	}
+
+	match.Name = name
+	return txn.Edit(match.ID, match)
+}
+
+func (a *APIKeys) remove(txn *mojura.Transaction, apiKey string) (removed *APIKey, err error) {
+	var match *APIKey
+	if match, err = a.get(txn, apiKey); err != nil {
+		return
+	}
+
+	if err = txn.Remove(match.ID); err != nil {
+		return
+	}
+
+	removed = match
+	return
 }
