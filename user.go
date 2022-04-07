@@ -44,6 +44,17 @@ func (j *Jump) CreateUser(email, password string, groups ...string) (userID, api
 	return
 }
 
+// RemoveUser will remove a user and delete it's ancillary components
+// Note: It is advised that this function is used when removing users rather than directly calling j.Users().New()
+func (j *Jump) RemoveUser(userID string) (err error) {
+	if _, err = j.usrs.Remove(userID); err != nil {
+		return
+	}
+
+	// TODO: Post delete actions
+	return
+}
+
 // InsertUser will insert an existing user (no password hashing)
 func (j *Jump) InsertUser(email, password string, groups ...string) (userID, apiKey string, err error) {
 	if userID, err = j.usrs.Insert(email, password); err != nil {
