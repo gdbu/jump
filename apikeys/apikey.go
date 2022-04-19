@@ -5,11 +5,16 @@ import (
 	"github.com/mojura/mojura"
 )
 
-func newAPIKey(userID, name, key string) (a APIKey) {
+func makeAPIKey(userID, name, key string) (a APIKey) {
 	a.UserID = userID
 	a.Name = name
 	a.Key = key
 	return
+}
+
+func newAPIKey() *APIKey {
+	var a APIKey
+	return &a
 }
 
 // APIKey represents an api key reference

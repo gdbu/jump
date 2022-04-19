@@ -5,6 +5,11 @@ import (
 	"github.com/mojura/mojura"
 )
 
+func newEntry() *Entry {
+	var e Entry
+	return &e
+}
+
 // Entry represents a user
 type Entry struct {
 	mojura.Entry

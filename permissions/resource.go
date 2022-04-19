@@ -4,10 +4,15 @@ import (
 	"github.com/mojura/mojura"
 )
 
-func newResource(key string) (r Resource) {
+func makeResource(key string) (r Resource) {
 	r.Key = key
 	r.Groups = make(Groups)
 	return
+}
+
+func newResource() *Resource {
+	var r Resource
+	return &r
 }
 
 // Resource represents a permissions resource entry

@@ -6,11 +6,16 @@ import (
 	"github.com/mojura/mojura"
 )
 
-func newSession(key, userID string) (s Session) {
+func makeSession(key, userID string) (s Session) {
 	s.Key = key
 	s.UserID = userID
 	s.setAction()
 	return
+}
+
+func newSession() *Session {
+	var s Session
+	return &s
 }
 
 // Session represents a user session
