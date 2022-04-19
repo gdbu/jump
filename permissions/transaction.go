@@ -2,7 +2,7 @@ package permissions
 
 import "github.com/mojura/mojura"
 
-func newTransaction(txn *mojura.Transaction, p *Permissions) (t Transaction) {
+func newTransaction(txn *mojura.Transaction[*Resource], p *Permissions) (t Transaction) {
 	t.txn = txn
 	t.p = p
 	return
@@ -11,19 +11,13 @@ func newTransaction(txn *mojura.Transaction, p *Permissions) (t Transaction) {
 
 // Transaction is the reminders manager
 type Transaction struct {
-	txn *mojura.Transaction
+	txn *mojura.Transaction[*Resource]
 	p   *Permissions
 }
 
 // Get will get the resource entry for a given resource ID
 func (t *Transaction) Get(resourceID string) (rp *Resource, err error) {
-	var r Resource
-	if err = t.txn.Get(resourceID, &r); err != nil {
-		return
-	}
-
-	rp = &r
-	return
+	return t.txn.Get(resourceID)
 }
 
 // GetByKey will get the resource entry for a given resource key
@@ -80,8 +74,12 @@ func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) 
 
 // Has will return whether or not an ID has a particular group associated with it
 func (t *Transaction) Has(resourceID, group string) (ok bool) {
-	var e Resource
-	if err := t.txn.Get(resourceID, &e); err != nil {
+	var (
+		e   *Resource
+		err error
+	)
+
+	if e, err = t.txn.Get(resourceID); err != nil {
 		return
 	}
 

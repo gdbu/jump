@@ -6,15 +6,15 @@ import (
 )
 
 type source interface {
-	New(value mojura.Value) (resourceID string, err error)
-	GetFiltered(value interface{}, opts *mojura.FilteringOpts) (lastID string, err error)
+	New(value *Resource) (resourceID string, err error)
+	GetFiltered(opts *mojura.FilteringOpts) (rs []*Resource, lastID string, err error)
 }
 
 func getByKey(s source, resourceKey string) (r *Resource, err error) {
 	var rs []*Resource
 	filter := filters.Match(relationshipResourceKeys, resourceKey)
 	opts := mojura.NewFilteringOpts(filter)
-	if _, err = s.GetFiltered(&rs, opts); err != nil {
+	if rs, _, err = s.GetFiltered(opts); err != nil {
 		return
 	}
 
@@ -32,7 +32,7 @@ func getOrCreateByKey(s source, resourceKey string) (rp *Resource, err error) {
 		return
 	}
 
-	r := newResource(resourceKey)
+	r := makeResource(resourceKey)
 	if _, err = s.New(&r); err != nil {
 		return
 	}

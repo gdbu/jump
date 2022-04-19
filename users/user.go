@@ -8,10 +8,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func newUser(email, password string) (u User) {
+func makeUser(email, password string) (u User) {
 	u.Email = strings.ToLower(email)
 	u.Password = password
 	return
+}
+
+func newUser() *User {
+	var u User
+	return &u
 }
 
 // User represents a user

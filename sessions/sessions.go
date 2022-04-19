@@ -37,7 +37,7 @@ func New(opts mojura.Opts) (sp *Sessions, err error) {
 
 	var s Sessions
 	s.out = scribe.New("Sessions")
-	if s.c, err = mojura.New(opts, &Session{}, relationships...); err != nil {
+	if s.c, err = mojura.New(opts, newSession, relationships...); err != nil {
 		return
 	}
 
@@ -55,7 +55,7 @@ func New(opts mojura.Opts) (sp *Sessions, err error) {
 // Sessions manages sessions
 type Sessions struct {
 	out *scribe.Scribe
-	c   *mojura.Mojura
+	c   *mojura.Mojura[*Session]
 	g   *uuid.Generator
 }
 
@@ -70,29 +70,23 @@ func (s *Sessions) newKeyToken() (key, token string) {
 	return
 }
 
-func (s *Sessions) newSession(key, token, userID string) Session {
+func (s *Sessions) makeSession(key, token, userID string) Session {
 	// Set session key
-	sessionKey := newSessionKey(key, token)
+	sessionKey := makeSessionKey(key, token)
 	// Create new session
-	return newSession(sessionKey, userID)
+	return makeSession(sessionKey, userID)
 }
 
-func (s *Sessions) getByKey(txn *mojura.Transaction, key string) (sp *Session, err error) {
-	var entry Session
+func (s *Sessions) getByKey(txn *mojura.Transaction[*Session], key string) (sp *Session, err error) {
 	filter := filters.Match(relationshipKeys, key)
 	opts := mojura.NewIteratingOpts(filter)
-	if err = txn.GetFirst(&entry, opts); err != nil {
-		return
-	}
-
-	sp = &entry
-	return
+	return txn.GetFirst(opts)
 }
 
-func (s *Sessions) getByUserID(txn *mojura.Transaction, userID string) (ss []*Session, err error) {
+func (s *Sessions) getByUserID(txn *mojura.Transaction[*Session], userID string) (ss []*Session, err error) {
 	filter := filters.Match(relationshipUsers, userID)
 	opts := mojura.NewFilteringOpts(filter)
-	if _, err = txn.GetFiltered(&ss, opts); err != nil {
+	if ss, _, err = txn.GetFiltered(opts); err != nil {
 		return
 	}
 
@@ -116,9 +110,8 @@ func (s *Sessions) loop() {
 }
 
 // purge will purge all entries older than the oldest value
-func (s *Sessions) purge(txn *mojura.Transaction, oldest int64) (err error) {
-	err = txn.ForEach(func(sessionID string, val mojura.Value) (err error) {
-		session := val.(*Session)
+func (s *Sessions) purge(txn *mojura.Transaction[*Session], oldest int64) (err error) {
+	err = txn.ForEach(func(sessionID string, session *Session) (err error) {
 		if session.LastUsedAt >= oldest {
 			return
 		}
@@ -130,7 +123,7 @@ func (s *Sessions) purge(txn *mojura.Transaction, oldest int64) (err error) {
 }
 
 // Remove will invalidate a provided key/token pair session
-func (s *Sessions) invalidateUser(txn *mojura.Transaction, userID string) (err error) {
+func (s *Sessions) invalidateUser(txn *mojura.Transaction[*Session], userID string) (err error) {
 	var ss []*Session
 	if ss, err = s.getByUserID(txn, userID); err != nil {
 		return
@@ -147,7 +140,7 @@ func (s *Sessions) invalidateUser(txn *mojura.Transaction, userID string) (err e
 
 // Purge will purge all entries oldest than the oldest value
 func (s *Sessions) Purge(oldest int64) (err error) {
-	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		return s.purge(txn, oldest)
 	})
 
@@ -159,9 +152,9 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 	// Set key/token
 	key, token = s.newKeyToken()
 	// Create new session
-	session := s.newSession(key, token, userID)
+	session := s.makeSession(key, token, userID)
 
-	if err = s.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = s.c.Batch(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		_, err = txn.New(&session)
 		return
 	}); err != nil {
@@ -176,8 +169,8 @@ func (s *Sessions) New(userID string) (key, token string, err error) {
 // Get will retrieve the user id associated with a provided key/token pair
 func (s *Sessions) Get(key, token string) (sp *Session, err error) {
 	// Create session key from the key/token pair
-	sessionKey := newSessionKey(key, token)
-	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	sessionKey := makeSessionKey(key, token)
+	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
 		}
@@ -191,8 +184,8 @@ func (s *Sessions) Get(key, token string) (sp *Session, err error) {
 // Refesh will refresh a session
 func (s *Sessions) Refesh(key, token string) (err error) {
 	// Create session key from the key/token pair
-	sessionKey := newSessionKey(key, token)
-	err = s.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
+	sessionKey := makeSessionKey(key, token)
+	err = s.c.Batch(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -208,7 +201,7 @@ func (s *Sessions) Refesh(key, token string) (err error) {
 
 // GetByUserID will retrieve all the sessions for a given user ID
 func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
-	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = s.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		ss, err = s.getByUserID(txn, userID)
 		return
 	})
@@ -219,8 +212,8 @@ func (s *Sessions) GetByUserID(userID string) (ss []*Session, err error) {
 // Remove will invalidate a provided key/token pair session
 func (s *Sessions) Remove(key, token string) (err error) {
 	// Create session key from the key/token pair
-	sessionKey := newSessionKey(key, token)
-	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	sessionKey := makeSessionKey(key, token)
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		var sp *Session
 		if sp, err = s.getByKey(txn, sessionKey); err != nil {
 			return
@@ -234,7 +227,7 @@ func (s *Sessions) Remove(key, token string) (err error) {
 
 // InvalidateUser will invalidate all sessions associated with a user
 func (s *Sessions) InvalidateUser(userID string) (err error) {
-	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = s.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Session]) (err error) {
 		return s.invalidateUser(txn, userID)
 	})
 

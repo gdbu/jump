@@ -1,24 +1,11 @@
 package sso
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
-
-func asEntry(val mojura.Value) (e *Entry, err error) {
-	var ok bool
-	// Attempt to assert the value as an *Entry
-	if e, ok = val.(*Entry); !ok {
-		// Invalid type provided, return error
-		err = fmt.Errorf("invalid entry type, expected %T and received %T", e, val)
-		return
-	}
-
-	return
-}
 
 func getTS() time.Time {
 	return time.Now().UTC()
