@@ -34,7 +34,7 @@ func New(opts mojura.Opts) (ap *APIKeys, err error) {
 	opts.Name = "apikeys"
 
 	var a APIKeys
-	if a.m, err = mojura.New(opts, &APIKey{}, relationships...); err != nil {
+	if a.m, err = mojura.New(opts, newAPIKey, relationships...); err != nil {
 		return
 	}
 
@@ -48,7 +48,7 @@ func New(opts mojura.Opts) (ap *APIKeys, err error) {
 
 // APIKeys manages the apiKeys service
 type APIKeys struct {
-	m *mojura.Mojura
+	m *mojura.Mojura[*APIKey]
 
 	gen *uuid.Generator
 }
@@ -56,7 +56,7 @@ type APIKeys struct {
 // New will create a new apiKey and return the associated ID
 func (a *APIKeys) New(userID, name string) (key string, err error) {
 	uuid := a.gen.New()
-	apiKey := newAPIKey(userID, name, uuid.String())
+	apiKey := makeAPIKey(userID, name, uuid.String())
 	if err = apiKey.Validate(); err != nil {
 		return
 	}
@@ -71,7 +71,7 @@ func (a *APIKeys) New(userID, name string) (key string, err error) {
 
 // Get will return the APIKey entry associated with the provided api key value
 func (a *APIKeys) Get(key string) (apiKey *APIKey, err error) {
-	err = a.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = a.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*APIKey]) (err error) {
 		apiKey, err = a.get(txn, key)
 		return
 	})
@@ -83,13 +83,13 @@ func (a *APIKeys) Get(key string) (apiKey *APIKey, err error) {
 func (a *APIKeys) GetByUser(userID string) (apiKeys []*APIKey, err error) {
 	filter := filters.Match(relationshipUsers, userID)
 	opts := mojura.NewFilteringOpts(filter)
-	_, err = a.m.GetFiltered(&apiKeys, opts)
+	apiKeys, _, err = a.m.GetFiltered(opts)
 	return
 }
 
 // UpdateName will edit an APIKey's name
 func (a *APIKeys) UpdateName(apiKey, name string) (err error) {
-	err = a.m.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = a.m.Transaction(context.Background(), func(txn *mojura.Transaction[*APIKey]) (err error) {
 		return a.updateName(txn, apiKey, name)
 	})
 
@@ -98,7 +98,7 @@ func (a *APIKeys) UpdateName(apiKey, name string) (err error) {
 
 // Remove will delete an apiKey
 func (a *APIKeys) Remove(apiKey string) (removed *APIKey, err error) {
-	err = a.m.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = a.m.Transaction(context.Background(), func(txn *mojura.Transaction[*APIKey]) (err error) {
 		removed, err = a.remove(txn, apiKey)
 		return
 	})
@@ -111,19 +111,13 @@ func (a *APIKeys) Close() (err error) {
 	return a.m.Close()
 }
 
-func (a *APIKeys) get(txn *mojura.Transaction, key string) (apiKey *APIKey, err error) {
-	var entry APIKey
+func (a *APIKeys) get(txn *mojura.Transaction[*APIKey], key string) (apiKey *APIKey, err error) {
 	filter := filters.Match(relationshipKeys, key)
 	opts := mojura.NewIteratingOpts(filter)
-	if err = txn.GetFirst(&entry, opts); err != nil {
-		return
-	}
-
-	apiKey = &entry
-	return
+	return txn.GetFirst(opts)
 }
 
-func (a *APIKeys) updateName(txn *mojura.Transaction, apiKey, name string) (err error) {
+func (a *APIKeys) updateName(txn *mojura.Transaction[*APIKey], apiKey, name string) (err error) {
 	var match *APIKey
 	if match, err = a.get(txn, apiKey); err != nil {
 		return
@@ -133,7 +127,7 @@ func (a *APIKeys) updateName(txn *mojura.Transaction, apiKey, name string) (err 
 	return txn.Edit(match.ID, match)
 }
 
-func (a *APIKeys) remove(txn *mojura.Transaction, apiKey string) (removed *APIKey, err error) {
+func (a *APIKeys) remove(txn *mojura.Transaction[*APIKey], apiKey string) (removed *APIKey, err error) {
 	var match *APIKey
 	if match, err = a.get(txn, apiKey); err != nil {
 		return

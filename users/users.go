@@ -37,7 +37,7 @@ func New(opts mojura.Opts) (up *Users, err error) {
 	opts.Name = "users"
 
 	var u Users
-	if u.c, err = mojura.New(opts, &User{}, relationships...); err != nil {
+	if u.m, err = mojura.New(opts, newUser, relationships...); err != nil {
 		return
 	}
 
@@ -47,10 +47,10 @@ func New(opts mojura.Opts) (up *Users, err error) {
 
 // Users manages the users
 type Users struct {
-	c *mojura.Mojura
+	m *mojura.Mojura[*User]
 }
 
-func (u *Users) new(txn *mojura.Transaction, user *User) (entryID string, err error) {
+func (u *Users) new(txn *mojura.Transaction[*User], user *User) (entryID string, err error) {
 	if _, err = u.getByEmail(txn, user.Email); err == nil {
 		err = ErrEmailExists
 		return
@@ -71,22 +71,16 @@ func (u *Users) getWithFn(id string, fn func(string, mojura.Value) error) (user 
 }
 
 // getByEmail will return the matching user for the provided email
-func (u *Users) getByEmail(txn *mojura.Transaction, email string) (up *User, err error) {
-	var user User
+func (u *Users) getByEmail(txn *mojura.Transaction[*User], email string) (up *User, err error) {
 	filter := filters.Match(relationshipEmails, email)
 	opts := mojura.NewIteratingOpts(filter)
-	if err = txn.GetFirst(&user, opts); err != nil {
-		return
-	}
-
-	up = &user
-	return
+	return txn.GetFirst(opts)
 }
 
 // edit will edit the user which matches the ID
-func (u *Users) edit(txn *mojura.Transaction, id string, fn func(*User) error) (err error) {
+func (u *Users) edit(txn *mojura.Transaction[*User], id string, fn func(*User) error) (err error) {
 	var user *User
-	if user, err = u.getWithFn(id, txn.Get); err != nil {
+	if user, err = txn.Get(id); err != nil {
 		return
 	}
 
@@ -97,7 +91,7 @@ func (u *Users) edit(txn *mojura.Transaction, id string, fn func(*User) error) (
 	return txn.Edit(id, user)
 }
 
-func (u *Users) updateEmail(txn *mojura.Transaction, id, email string) (err error) {
+func (u *Users) updateEmail(txn *mojura.Transaction[*User], id, email string) (err error) {
 	if _, err = u.getByEmail(txn, email); err == nil {
 		err = ErrEmailExists
 		return
@@ -111,7 +105,7 @@ func (u *Users) updateEmail(txn *mojura.Transaction, id, email string) (err erro
 	return
 }
 
-func (u *Users) updatePassword(txn *mojura.Transaction, id, password string) (err error) {
+func (u *Users) updatePassword(txn *mojura.Transaction[*User], id, password string) (err error) {
 	err = u.edit(txn, id, func(user *User) (err error) {
 		user.Password = password
 		return user.hashPassword()
@@ -120,7 +114,7 @@ func (u *Users) updatePassword(txn *mojura.Transaction, id, password string) (er
 	return
 }
 
-func (u *Users) updateVerified(txn *mojura.Transaction, id string, verified bool) (err error) {
+func (u *Users) updateVerified(txn *mojura.Transaction[*User], id string, verified bool) (err error) {
 	err = u.edit(txn, id, func(user *User) (err error) {
 		user.Verified = verified
 		return
@@ -129,7 +123,7 @@ func (u *Users) updateVerified(txn *mojura.Transaction, id string, verified bool
 	return
 }
 
-func (u *Users) updateDisabled(txn *mojura.Transaction, id string, disabled bool) (err error) {
+func (u *Users) updateDisabled(txn *mojura.Transaction[*User], id string, disabled bool) (err error) {
 	err = u.edit(txn, id, func(user *User) (err error) {
 		user.Disabled = disabled
 		return
@@ -138,7 +132,7 @@ func (u *Users) updateDisabled(txn *mojura.Transaction, id string, disabled bool
 	return
 }
 
-func (u *Users) updateLastLoggedInAt(txn *mojura.Transaction, id string, lastLoggedInAt int64) (err error) {
+func (u *Users) updateLastLoggedInAt(txn *mojura.Transaction[*User], id string, lastLoggedInAt int64) (err error) {
 	err = u.edit(txn, id, func(user *User) (err error) {
 		user.LastLoggedInAt = lastLoggedInAt
 		return
@@ -148,9 +142,9 @@ func (u *Users) updateLastLoggedInAt(txn *mojura.Transaction, id string, lastLog
 }
 
 // Match will return the matching email for the provided id and password
-func (u *Users) match(txn *mojura.Transaction, id, password string) (email string, err error) {
-	var match User
-	if err = txn.Get(id, &match); err != nil {
+func (u *Users) match(txn *mojura.Transaction[*User], id, password string) (email string, err error) {
+	var match *User
+	if match, err = txn.Get(id); err != nil {
 		return
 	}
 
@@ -169,7 +163,7 @@ func (u *Users) match(txn *mojura.Transaction, id, password string) (email strin
 }
 
 // MatchEmail will return the matching user id for the provided email and password
-func (u *Users) matchEmail(txn *mojura.Transaction, email, password string) (id string, err error) {
+func (u *Users) matchEmail(txn *mojura.Transaction[*User], email, password string) (id string, err error) {
 	// Ensure the comparing email is all lower case
 	email = strings.ToLower(email)
 
@@ -200,14 +194,14 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 		return
 	}
 
-	user := newUser(email, password)
+	user := makeUser(email, password)
 	user.sanitize()
 
 	if err = user.hashPassword(); err != nil {
 		return
 	}
 
-	err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		entryID, err = u.new(txn, &user)
 		return
 	})
@@ -223,10 +217,10 @@ func (u *Users) Insert(email, password string) (entryID string, err error) {
 		return
 	}
 
-	user := newUser(email, password)
+	user := makeUser(email, password)
 	user.sanitize()
 
-	err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		entryID, err = u.new(txn, &user)
 		return
 	})
@@ -236,7 +230,7 @@ func (u *Users) Insert(email, password string) (entryID string, err error) {
 
 // Get will get the user which matches the ID
 func (u *Users) Get(id string) (user *User, err error) {
-	if user, err = u.getWithFn(id, u.c.Get); err != nil {
+	if user, err = u.m.Get(id); err != nil {
 		return
 	}
 
@@ -247,7 +241,7 @@ func (u *Users) Get(id string) (user *User, err error) {
 
 // GetByEmail will get the user which matches the e,ail
 func (u *Users) GetByEmail(email string) (user *User, err error) {
-	if err = u.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		if user, err = u.getByEmail(txn, email); err != nil {
 			return
 		}
@@ -264,9 +258,7 @@ func (u *Users) GetByEmail(email string) (user *User, err error) {
 
 // ForEach will iterate through all users in the database
 func (u *Users) ForEach(fn func(*User) error) (err error) {
-	err = u.c.ForEach(func(userID string, val mojura.Value) (err error) {
-		user := val.(*User)
-
+	err = u.m.ForEach(func(_ string, user *User) (err error) {
 		// Clear password
 		user.Password = ""
 
@@ -285,7 +277,7 @@ func (u *Users) UpdateEmail(id, email string) (err error) {
 	// Convert to lowercase
 	email = strings.ToLower(email)
 
-	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		return u.updateEmail(txn, id, email)
 	}); err != nil {
 		return
@@ -300,7 +292,7 @@ func (u *Users) UpdatePassword(id, password string) (err error) {
 		return ErrInvalidPassword
 	}
 
-	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		return u.updatePassword(txn, id, password)
 	}); err != nil {
 		return
@@ -311,7 +303,7 @@ func (u *Users) UpdatePassword(id, password string) (err error) {
 
 // UpdateVerified will change the user's verified state
 func (u *Users) UpdateVerified(id string, verified bool) (err error) {
-	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		return u.updateVerified(txn, id, verified)
 	}); err != nil {
 		return
@@ -322,7 +314,7 @@ func (u *Users) UpdateVerified(id string, verified bool) (err error) {
 
 // UpdateDisabled will change the user's disabled state
 func (u *Users) UpdateDisabled(id string, disabled bool) (err error) {
-	if err = u.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		return u.updateDisabled(txn, id, disabled)
 	}); err != nil {
 		return
@@ -333,7 +325,7 @@ func (u *Users) UpdateDisabled(id string, disabled bool) (err error) {
 
 // UpdateLastLoggedInAt will change the user's last logged in at timestamp
 func (u *Users) UpdateLastLoggedInAt(id string, lastLoggedInAt int64) (err error) {
-	if err = u.c.Batch(context.Background(), func(txn *mojura.Transaction) (err error) {
+	if err = u.m.Batch(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		return u.updateLastLoggedInAt(txn, id, lastLoggedInAt)
 	}); err != nil {
 		return
@@ -344,7 +336,7 @@ func (u *Users) UpdateLastLoggedInAt(id string, lastLoggedInAt int64) (err error
 
 // Match will return the matching email for the provided id and password
 func (u *Users) Match(id, password string) (email string, err error) {
-	err = u.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = u.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		email, err = u.match(txn, id, password)
 		return
 	})
@@ -354,7 +346,7 @@ func (u *Users) Match(id, password string) (email string, err error) {
 
 // MatchEmail will return the matching user id for the provided email and password
 func (u *Users) MatchEmail(email, password string) (id string, err error) {
-	err = u.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = u.m.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
 		id, err = u.matchEmail(txn, email, password)
 		return
 	})
@@ -364,5 +356,5 @@ func (u *Users) MatchEmail(email, password string) (id string, err error) {
 
 // Close will close the selected instance of users
 func (u *Users) Close() (err error) {
-	return u.c.Close()
+	return u.m.Close()
 }

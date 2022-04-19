@@ -20,9 +20,7 @@ func TestNew(t *testing.T) {
 	if c, err = testInit(); err != nil {
 		t.Fatal(err)
 	}
-	if err = testTeardown(c); err != nil {
-		t.Fatal(err)
-	}
+	testTeardown(t, c)
 }
 
 func TestController_New(t *testing.T) {
@@ -34,7 +32,7 @@ func TestController_New(t *testing.T) {
 	if c, err = testInit(); err != nil {
 		t.Fatal(err)
 	}
-	defer testTeardown(c)
+	defer testTeardown(t, c)
 
 	var e *Entry
 	if e, err = c.New(context.Background(), "user_0"); err != nil {
@@ -55,7 +53,7 @@ func TestController_New_replace(t *testing.T) {
 	if c, err = testInit(); err != nil {
 		t.Fatal(err)
 	}
-	defer testTeardown(c)
+	defer testTeardown(t, c)
 
 	var e *Entry
 	if e, err = c.New(context.Background(), "user_0"); err != nil {
@@ -84,7 +82,7 @@ func TestController_Login(t *testing.T) {
 	if c, err = testInit(); err != nil {
 		t.Fatal(err)
 	}
-	defer testTeardown(c)
+	defer testTeardown(t, c)
 
 	var e *Entry
 	if e, err = c.New(context.Background(), "user_0"); err != nil {
@@ -114,7 +112,7 @@ func TestController_Login_double_login(t *testing.T) {
 	if c, err = testInit(); err != nil {
 		t.Fatal(err)
 	}
-	defer testTeardown(c)
+	defer testTeardown(t, c)
 
 	var e *Entry
 	if e, err = c.New(context.Background(), "user_0"); err != nil {
@@ -140,9 +138,11 @@ func testInit() (c *Controller, err error) {
 	return New(opts)
 }
 
-func testTeardown(c *Controller) (err error) {
+func testTeardown(t *testing.T, c *Controller) {
 	var errs errors.ErrorList
 	errs.Push(c.Close())
 	errs.Push(os.RemoveAll("./test_data"))
-	return errs.Err()
+	if err := errs.Err(); err != nil {
+		t.Fatalf("error during teardown: %v", err)
+	}
 }

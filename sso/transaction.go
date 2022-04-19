@@ -6,7 +6,7 @@ import (
 	"github.com/mojura/mojura"
 )
 
-func newTransaction(txn *mojura.Transaction, c *Controller) *Transaction {
+func newTransaction(txn *mojura.Transaction[*Entry], c *Controller) *Transaction {
 	var t Transaction
 	t.txn = txn
 	t.c = c
@@ -15,7 +15,7 @@ func newTransaction(txn *mojura.Transaction, c *Controller) *Transaction {
 
 // Transaction represents a controller transaction
 type Transaction struct {
-	txn *mojura.Transaction
+	txn *mojura.Transaction[*Entry]
 	c   *Controller
 }
 
@@ -25,19 +25,6 @@ func (t *Transaction) New(ctx context.Context, userID string) (created *Entry, e
 	e := makeEntry(userID)
 
 	return t.c.new(t.txn, &e)
-}
-
-// Get will retrieve an Entry which has the same ID as the provided entryID
-func (t *Transaction) Get(entryID string) (entry *Entry, err error) {
-	var e Entry
-	// Attempt to get Entry with the provided ID, pass reference to entry for which values to be applied
-	if err = t.txn.Get(entryID, &e); err != nil {
-		return
-	}
-
-	// Assign reference to retrieved Entry
-	entry = &e
-	return
 }
 
 // GetByUser will return an entry for a given user (if it exists)
@@ -63,23 +50,6 @@ func (t *Transaction) GetExpiredWithinPreviousDay() (expired []*Entry, err error
 // Login will find a matching entry and return the user ID
 func (t *Transaction) Login(loginCode string) (userID string, err error) {
 	return t.c.login(t.txn, loginCode)
-}
-
-// ForEach will iterate through all Entries
-// Note: The error constant mojura.Break can returned by the iterating func to end the iteration early
-func (t *Transaction) ForEach(fn func(*Entry) error, opts *mojura.IteratingOpts) (err error) {
-	// Iterate through all entries
-	err = t.txn.ForEach(func(key string, val mojura.Value) (err error) {
-		var e *Entry
-		if e, err = asEntry(val); err != nil {
-			return
-		}
-
-		// Pass iterating Entry to iterating function
-		return fn(e)
-	}, opts)
-
-	return
 }
 
 // Delete will remove an Entry for by entry ID

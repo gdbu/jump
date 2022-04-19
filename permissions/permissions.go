@@ -26,7 +26,7 @@ func New(opts mojura.Opts) (pp *Permissions, err error) {
 	opts.Name = "permissions"
 
 	var p Permissions
-	if p.c, err = mojura.New(opts, &Resource{}, relationshipResourceKeys); err != nil {
+	if p.c, err = mojura.New(opts, newResource, relationshipResourceKeys); err != nil {
 		return
 	}
 
@@ -36,11 +36,11 @@ func New(opts mojura.Opts) (pp *Permissions, err error) {
 
 // Permissions manages permissions
 type Permissions struct {
-	c *mojura.Mojura
+	c *mojura.Mojura[*Resource]
 	g *groups.Groups
 }
 
-func (p *Permissions) setPermissions(txn *mojura.Transaction, resourceKey, group string, actions Action) (err error) {
+func (p *Permissions) setPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string, actions Action) (err error) {
 	var r *Resource
 	if r, err = getOrCreateByKey(txn, resourceKey); err != nil {
 		return
@@ -53,7 +53,7 @@ func (p *Permissions) setPermissions(txn *mojura.Transaction, resourceKey, group
 	return txn.Edit(r.ID, r)
 }
 
-func (p *Permissions) unsetPermissions(txn *mojura.Transaction, resourceKey, group string) (err error) {
+func (p *Permissions) unsetPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string) (err error) {
 	var r *Resource
 	if r, err = getByKey(txn, resourceKey); err != nil {
 		return
@@ -66,7 +66,7 @@ func (p *Permissions) unsetPermissions(txn *mojura.Transaction, resourceKey, gro
 	return txn.Edit(r.ID, r)
 }
 
-func (p *Permissions) removeResource(txn *mojura.Transaction, resourceKey string) (err error) {
+func (p *Permissions) removeResource(txn *mojura.Transaction[*Resource], resourceKey string) (err error) {
 	var r *Resource
 	if r, err = getByKey(txn, resourceKey); err != nil {
 		return
@@ -77,14 +77,7 @@ func (p *Permissions) removeResource(txn *mojura.Transaction, resourceKey string
 
 // Get will get the resource entry for a given resource ID
 func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
-
-	var e Resource
-	if err = p.c.Get(resourceID, &e); err != nil {
-		return
-	}
-
-	ep = &e
-	return
+	return p.c.Get(resourceID)
 }
 
 // GetByKey will get the resource entry for a given resource key
@@ -94,7 +87,7 @@ func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
 
 // SetPermissions will set the permissions for a resource key being accessed by given group
 func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		return p.setPermissions(txn, resourceKey, group, actions)
 	})
 
@@ -103,7 +96,7 @@ func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) 
 
 // SetMultiPermissions will set the permissions for a resource key being accessed by given group
 func (p *Permissions) SetMultiPermissions(resourceKey string, pairs ...Pair) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		for _, pair := range pairs {
 			if err = p.setPermissions(txn, resourceKey, pair.Group, pair.Actions); err != nil {
 				return
@@ -118,7 +111,7 @@ func (p *Permissions) SetMultiPermissions(resourceKey string, pairs ...Pair) (er
 
 // UnsetPermissions will remove the permissions for a resource key being accessed by given group
 func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		return p.unsetPermissions(txn, resourceKey, group)
 	})
 
@@ -127,7 +120,7 @@ func (p *Permissions) UnsetPermissions(resourceKey, group string) (err error) {
 
 // UnsetMultiPermissions will remove the permissions for a resource key being accessed set of groups
 func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		for _, group := range groups {
 			if err = p.unsetPermissions(txn, resourceKey, group); err != nil {
 				return
@@ -168,8 +161,12 @@ func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) 
 
 // Has will return whether or not an ID has a particular group associated with it
 func (p *Permissions) Has(resourceID, group string) (ok bool) {
-	var e Resource
-	if err := p.c.Get(resourceID, &e); err != nil {
+	var (
+		e   *Resource
+		err error
+	)
+
+	if e, err = p.c.Get(resourceID); err != nil {
 		return
 	}
 
@@ -178,7 +175,7 @@ func (p *Permissions) Has(resourceID, group string) (ok bool) {
 
 // RemoveResource will remove a resource by key
 func (p *Permissions) RemoveResource(resourceKey string) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		return p.removeResource(txn, resourceKey)
 	})
 
@@ -187,7 +184,7 @@ func (p *Permissions) RemoveResource(resourceKey string) (err error) {
 
 // Transaction will initialize a transaction for all methods to be executed under
 func (p *Permissions) Transaction(fn func(*Transaction) error) (err error) {
-	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction) (err error) {
+	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
 		t := newTransaction(txn, p)
 		err = fn(&t)
 		t.txn = nil
