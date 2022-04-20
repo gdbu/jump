@@ -8,14 +8,13 @@ require (
 	github.com/gdbu/stringset v0.1.6
 	github.com/gdbu/uuid v0.1.0
 	github.com/hatchify/errors v0.4.82
-	github.com/mojura/mojura v0.12.0
+	github.com/mojura/mojura v0.12.5
 	github.com/vroomy/common v0.5.2
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 )
 
 require (
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
-	github.com/gdbu/atoms v1.0.1 // indirect
 	github.com/gdbu/bolt v1.4.0 // indirect
 	github.com/gdbu/stopwatch v0.5.0 // indirect
 	github.com/hatchify/colors v0.4.79 // indirect
