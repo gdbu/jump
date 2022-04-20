@@ -73,7 +73,7 @@ func (u *Users) getWithFn(id string, fn func(string, mojura.Value) error) (user 
 // getByEmail will return the matching user for the provided email
 func (u *Users) getByEmail(txn *mojura.Transaction[*User], email string) (up *User, err error) {
 	filter := filters.Match(relationshipEmails, email)
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)
 }
 

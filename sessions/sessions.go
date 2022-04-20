@@ -79,7 +79,7 @@ func (s *Sessions) makeSession(key, token, userID string) Session {
 
 func (s *Sessions) getByKey(txn *mojura.Transaction[*Session], key string) (sp *Session, err error) {
 	filter := filters.Match(relationshipKeys, key)
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)
 }
 
