@@ -181,7 +181,7 @@ func (c *Controller) MultiLogin(ctx context.Context, loginCode string, ttl time.
 
 // ForEach will iterate through all Entries
 // Note: The error constant mojura.Break can returned by the iterating func to end the iteration early
-func (c *Controller) ForEach(fn func(*Entry) error, opts *mojura.IteratingOpts) (err error) {
+func (c *Controller) ForEach(fn func(*Entry) error, opts *mojura.FilteringOpts) (err error) {
 	// Iterate through all entries
 	err = c.m.ForEach(func(_ string, e *Entry) (err error) {
 		// Pass iterating Entry to iterating function
@@ -275,13 +275,13 @@ func (c *Controller) new(txn *mojura.Transaction[*Entry], e *Entry) (created *En
 
 func (c *Controller) getByUser(txn *mojura.Transaction[*Entry], userID string) (entry *Entry, err error) {
 	userFilter := filters.Match(RelationshipUsers, userID)
-	opts := mojura.NewIteratingOpts(userFilter)
+	opts := mojura.NewFilteringOpts(userFilter)
 	return txn.GetFirst(opts)
 }
 
 func (c *Controller) getByCode(txn *mojura.Transaction[*Entry], loginCode string) (entry *Entry, err error) {
 	codeFilter := filters.Match(RelationshipLoginCodes, loginCode)
-	opts := mojura.NewIteratingOpts(codeFilter)
+	opts := mojura.NewFilteringOpts(codeFilter)
 	return txn.GetFirst(opts)
 }
 
@@ -300,7 +300,7 @@ func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction[*Entry]
 }
 
 func (c *Controller) getNextToExpire(txn *mojura.Transaction[*Entry]) (next *Entry, err error) {
-	opts := mojura.NewIteratingOpts(sortByExpiresAt)
+	opts := mojura.NewFilteringOpts(sortByExpiresAt)
 	return txn.GetFirst(opts)
 }
 
@@ -360,7 +360,7 @@ func (c *Controller) deleteByCode(txn *mojura.Transaction[*Entry], loginCode str
 
 func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction[*Entry]) (err error) {
 	filter := newExpiredWithinPreviousHourFilter()
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	err = txn.ForEachID(func(entryID string) (err error) {
 		_, err = c.delete(txn, entryID)
 		return
@@ -370,7 +370,7 @@ func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction[*Entry]) (e
 
 func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction[*Entry]) (err error) {
 	filter := newExpiredWithinPreviousDayFilter()
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	err = txn.ForEachID(func(entryID string) (err error) {
 		_, err = c.delete(txn, entryID)
 		return

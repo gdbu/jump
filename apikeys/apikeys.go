@@ -113,7 +113,7 @@ func (a *APIKeys) Close() (err error) {
 
 func (a *APIKeys) get(txn *mojura.Transaction[*APIKey], key string) (apiKey *APIKey, err error) {
 	filter := filters.Match(relationshipKeys, key)
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)
 }
 

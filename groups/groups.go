@@ -127,7 +127,7 @@ func (g *Groups) HasGroup(userID string, group string) (hasGroup bool, err error
 
 // ForEach will iterate through all users in the database
 func (g *Groups) ForEach(seekTo string, fn func(*Entry) error, filters ...mojura.Filter) (err error) {
-	opts := mojura.NewIteratingOpts(filters...)
+	opts := mojura.NewFilteringOpts(filters...)
 	err = g.c.ForEach(func(_ string, entry *Entry) (err error) {
 		return fn(entry)
 	}, opts)
@@ -175,6 +175,6 @@ func (g *Groups) update(txn *mojura.Transaction[*Entry], userID string, fn func(
 // get will get an Entry by user ID
 func (g *Groups) get(txn *mojura.Transaction[*Entry], userID string) (entry *Entry, err error) {
 	filter := filters.Match(relationshipUsers, userID)
-	opts := mojura.NewIteratingOpts(filter)
+	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)
 }
