@@ -12,11 +12,6 @@ func makeAPIKey(userID, name, key string) (a APIKey) {
 	return
 }
 
-func newAPIKey() *APIKey {
-	var a APIKey
-	return &a
-}
-
 // APIKey represents an api key reference
 type APIKey struct {
 	mojura.Entry

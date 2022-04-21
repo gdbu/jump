@@ -10,11 +10,6 @@ func makeResource(key string) (r Resource) {
 	return
 }
 
-func newResource() *Resource {
-	var r Resource
-	return &r
-}
-
 // Resource represents a permissions resource entry
 type Resource struct {
 	mojura.Entry

@@ -13,11 +13,6 @@ func makeSession(key, userID string) (s Session) {
 	return
 }
 
-func newSession() *Session {
-	var s Session
-	return &s
-}
-
 // Session represents a user session
 type Session struct {
 	mojura.Entry

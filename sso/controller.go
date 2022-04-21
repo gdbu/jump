@@ -48,7 +48,7 @@ func New(opts mojura.Opts) (cc *Controller, err error) {
 	opts.Name = "sso"
 
 	var c Controller
-	if c.m, err = mojura.New(opts, newEntry, relationships...); err != nil {
+	if c.m, err = mojura.New[Entry](opts, relationships...); err != nil {
 		return
 	}
 
@@ -66,7 +66,7 @@ type Controller struct {
 	out *scribe.Scribe
 
 	// Core will manage the data layer and will utilize the underlying back-end
-	m *mojura.Mojura[*Entry]
+	m *mojura.Mojura[Entry, *Entry]
 
 	updateCh chan struct{}
 
@@ -85,7 +85,7 @@ func (c *Controller) New(ctx context.Context, userID string) (created *Entry, er
 	}
 
 	// Initialize new R/W transaction
-	if err = c.m.Transaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	if err = c.m.Transaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		// Insert entry into DB
 		created, err = c.new(txn, &e)
 		return
@@ -104,7 +104,7 @@ func (c *Controller) Get(entryID string) (entry *Entry, err error) {
 
 // GetByUser will return an entry for a given user (if it exists)
 func (c *Controller) GetByUser(ctx context.Context, userID string) (entry *Entry, err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		entry, err = c.getByUser(txn, userID)
 		return
 	})
@@ -114,7 +114,7 @@ func (c *Controller) GetByUser(ctx context.Context, userID string) (entry *Entry
 
 // GetByCode will return an entry for a given login code (if it exists)
 func (c *Controller) GetByCode(ctx context.Context, loginCode string) (entry *Entry, err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		entry, err = c.getByCode(txn, loginCode)
 		return
 	})
@@ -124,7 +124,7 @@ func (c *Controller) GetByCode(ctx context.Context, loginCode string) (entry *En
 
 // GetExpiredWithinPreviousHour will return a list of entries which expired in the previous hour
 func (c *Controller) GetExpiredWithinPreviousHour(ctx context.Context) (expired []*Entry, err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		expired, err = c.getExpiredWithinPreviousHour(txn)
 		return
 	})
@@ -134,7 +134,7 @@ func (c *Controller) GetExpiredWithinPreviousHour(ctx context.Context) (expired 
 
 // GetExpiredWithinPreviousDay will return a list of entries which expired in the previous day
 func (c *Controller) GetExpiredWithinPreviousDay(ctx context.Context) (expired []*Entry, err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		expired, err = c.getExpiredWithinPreviousDay(txn)
 		return
 	})
@@ -144,7 +144,7 @@ func (c *Controller) GetExpiredWithinPreviousDay(ctx context.Context) (expired [
 
 // GetExpiredWithinPreviousDay will return a list of entries which expired in the previous day
 func (c *Controller) GetNextToExpire(ctx context.Context) (next *Entry, err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		next, err = c.getNextToExpire(txn)
 		return
 	})
@@ -154,7 +154,7 @@ func (c *Controller) GetNextToExpire(ctx context.Context) (next *Entry, err erro
 
 // Login will find a matching entry and return the user ID
 func (c *Controller) Login(ctx context.Context, loginCode string) (userID string, err error) {
-	if err = c.m.Batch(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	if err = c.m.Batch(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		userID, err = c.login(txn, loginCode)
 		return
 	}); err != nil {
@@ -168,7 +168,7 @@ func (c *Controller) Login(ctx context.Context, loginCode string) (userID string
 // MultiLogin will find a matching entry and return the user ID
 // Note: This allows for multiple logins for a single code within a 30 second window
 func (c *Controller) MultiLogin(ctx context.Context, loginCode string, ttl time.Duration) (userID string, err error) {
-	if err = c.m.Batch(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	if err = c.m.Batch(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		userID, err = c.multiLogin(txn, loginCode, ttl)
 		return
 	}); err != nil {
@@ -193,7 +193,7 @@ func (c *Controller) ForEach(fn func(*Entry) error, opts *mojura.FilteringOpts) 
 
 // Delete will remove an Entry for by entry ID
 func (c *Controller) Delete(ctx context.Context, entryID string) (removed *Entry, err error) {
-	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		removed, err = c.delete(txn, entryID)
 		return
 	})
@@ -203,7 +203,7 @@ func (c *Controller) Delete(ctx context.Context, entryID string) (removed *Entry
 
 // DeleteByUser will remove an Entry for by user ID
 func (c *Controller) DeleteByUser(ctx context.Context, userID string) (removed *Entry, err error) {
-	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		removed, err = c.deleteByUser(txn, userID)
 		return
 	})
@@ -225,7 +225,7 @@ func (c *Controller) DeleteExpiredInPastDay(ctx context.Context) (err error) {
 
 // Transaction will initialize a new R/W transaction
 func (c *Controller) Transaction(ctx context.Context, fn func(txn *Transaction) (err error)) (err error) {
-	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.Transaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		t := newTransaction(txn, c)
 		defer t.cleanup()
 		return fn(t)
@@ -236,7 +236,7 @@ func (c *Controller) Transaction(ctx context.Context, fn func(txn *Transaction) 
 
 // ReadTransaction will initialize a new R-only transaction
 func (c *Controller) ReadTransaction(ctx context.Context, fn func(txn *Transaction) (err error)) (err error) {
-	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[*Entry]) (err error) {
+	err = c.m.ReadTransaction(ctx, func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 		t := newTransaction(txn, c)
 		defer t.cleanup()
 		return fn(t)
@@ -252,7 +252,7 @@ func (c *Controller) Close() (err error) {
 	return c.m.Close()
 }
 
-func (c *Controller) new(txn *mojura.Transaction[*Entry], e *Entry) (created *Entry, err error) {
+func (c *Controller) new(txn *mojura.Transaction[Entry, *Entry], e *Entry) (created *Entry, err error) {
 	// Attempt to validate Entry
 	if err = e.Validate(); err != nil {
 		// Entry is not valid, return validation error
@@ -265,7 +265,7 @@ func (c *Controller) new(txn *mojura.Transaction[*Entry], e *Entry) (created *En
 	}
 
 	// Insert Entry into mojura.Core and return the results
-	if _, err = txn.New(e); err != nil {
+	if _, err = txn.New(*e); err != nil {
 		return
 	}
 
@@ -273,38 +273,38 @@ func (c *Controller) new(txn *mojura.Transaction[*Entry], e *Entry) (created *En
 	return
 }
 
-func (c *Controller) getByUser(txn *mojura.Transaction[*Entry], userID string) (entry *Entry, err error) {
+func (c *Controller) getByUser(txn *mojura.Transaction[Entry, *Entry], userID string) (entry *Entry, err error) {
 	userFilter := filters.Match(RelationshipUsers, userID)
 	opts := mojura.NewFilteringOpts(userFilter)
 	return txn.GetFirst(opts)
 }
 
-func (c *Controller) getByCode(txn *mojura.Transaction[*Entry], loginCode string) (entry *Entry, err error) {
+func (c *Controller) getByCode(txn *mojura.Transaction[Entry, *Entry], loginCode string) (entry *Entry, err error) {
 	codeFilter := filters.Match(RelationshipLoginCodes, loginCode)
 	opts := mojura.NewFilteringOpts(codeFilter)
 	return txn.GetFirst(opts)
 }
 
-func (c *Controller) getExpiredWithinPreviousHour(txn *mojura.Transaction[*Entry]) (expired []*Entry, err error) {
+func (c *Controller) getExpiredWithinPreviousHour(txn *mojura.Transaction[Entry, *Entry]) (expired []*Entry, err error) {
 	filter := newExpiredWithinPreviousHourFilter()
 	opts := mojura.NewFilteringOpts(filter)
 	expired, _, err = txn.GetFiltered(opts)
 	return
 }
 
-func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction[*Entry]) (expired []*Entry, err error) {
+func (c *Controller) getExpiredWithinPreviousDay(txn *mojura.Transaction[Entry, *Entry]) (expired []*Entry, err error) {
 	filter := newExpiredWithinPreviousDayFilter()
 	opts := mojura.NewFilteringOpts(filter)
 	expired, _, err = txn.GetFiltered(opts)
 	return
 }
 
-func (c *Controller) getNextToExpire(txn *mojura.Transaction[*Entry]) (next *Entry, err error) {
+func (c *Controller) getNextToExpire(txn *mojura.Transaction[Entry, *Entry]) (next *Entry, err error) {
 	opts := mojura.NewFilteringOpts(sortByExpiresAt)
 	return txn.GetFirst(opts)
 }
 
-func (c *Controller) delete(txn *mojura.Transaction[*Entry], userID string) (removed *Entry, err error) {
+func (c *Controller) delete(txn *mojura.Transaction[Entry, *Entry], userID string) (removed *Entry, err error) {
 	var e *Entry
 	if e, err = txn.Get(userID); err != nil {
 		return
@@ -318,7 +318,7 @@ func (c *Controller) delete(txn *mojura.Transaction[*Entry], userID string) (rem
 	return
 }
 
-func (c *Controller) deleteByUser(txn *mojura.Transaction[*Entry], userID string) (removed *Entry, err error) {
+func (c *Controller) deleteByUser(txn *mojura.Transaction[Entry, *Entry], userID string) (removed *Entry, err error) {
 	var e *Entry
 	e, err = c.getByUser(txn, userID)
 	switch err {
@@ -338,7 +338,7 @@ func (c *Controller) deleteByUser(txn *mojura.Transaction[*Entry], userID string
 	return
 }
 
-func (c *Controller) deleteByCode(txn *mojura.Transaction[*Entry], loginCode string) (removed *Entry, err error) {
+func (c *Controller) deleteByCode(txn *mojura.Transaction[Entry, *Entry], loginCode string) (removed *Entry, err error) {
 	var e *Entry
 	e, err = c.getByCode(txn, loginCode)
 	switch err {
@@ -358,7 +358,7 @@ func (c *Controller) deleteByCode(txn *mojura.Transaction[*Entry], loginCode str
 	return
 }
 
-func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction[*Entry]) (err error) {
+func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 	filter := newExpiredWithinPreviousHourFilter()
 	opts := mojura.NewFilteringOpts(filter)
 	err = txn.ForEachID(func(entryID string) (err error) {
@@ -368,7 +368,7 @@ func (c *Controller) deleteExpiredInPastHour(txn *mojura.Transaction[*Entry]) (e
 	return
 }
 
-func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction[*Entry]) (err error) {
+func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction[Entry, *Entry]) (err error) {
 	filter := newExpiredWithinPreviousDayFilter()
 	opts := mojura.NewFilteringOpts(filter)
 	err = txn.ForEachID(func(entryID string) (err error) {
@@ -379,7 +379,7 @@ func (c *Controller) deleteExpiredInPastDay(txn *mojura.Transaction[*Entry]) (er
 }
 
 // Login will find a matching entry and return the user ID
-func (c *Controller) login(txn *mojura.Transaction[*Entry], loginCode string) (userID string, err error) {
+func (c *Controller) login(txn *mojura.Transaction[Entry, *Entry], loginCode string) (userID string, err error) {
 	var removed *Entry
 	// Remove entry which matches the login code
 	if removed, err = c.deleteByCode(txn, loginCode); err != nil {
@@ -405,7 +405,7 @@ func (c *Controller) login(txn *mojura.Transaction[*Entry], loginCode string) (u
 }
 
 // multiLogin will allow multiple logins through a single code
-func (c *Controller) multiLogin(txn *mojura.Transaction[*Entry], loginCode string, ttl time.Duration) (userID string, err error) {
+func (c *Controller) multiLogin(txn *mojura.Transaction[Entry, *Entry], loginCode string, ttl time.Duration) (userID string, err error) {
 	var entry *Entry
 	// Remove entry which matches the login code
 	if entry, err = c.getByCode(txn, loginCode); err != nil {
@@ -428,7 +428,7 @@ func (c *Controller) multiLogin(txn *mojura.Transaction[*Entry], loginCode strin
 	newExpiration := now.Add(ttl)
 	if entry.ExpiresAt.After(newExpiration) {
 		entry.ExpiresAt = newExpiration
-		if _, err = txn.Put(entry.ID, entry); err != nil {
+		if _, err = txn.Put(entry.ID, *entry); err != nil {
 			return
 		}
 	}
