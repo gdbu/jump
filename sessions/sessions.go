@@ -116,7 +116,8 @@ func (s *Sessions) purge(txn *mojura.Transaction[*Session], oldest int64) (err e
 			return
 		}
 
-		return txn.Remove(sessionID)
+		_, err = txn.Delete(sessionID)
+		return
 	}, nil)
 
 	return
@@ -130,7 +131,7 @@ func (s *Sessions) invalidateUser(txn *mojura.Transaction[*Session], userID stri
 	}
 
 	for _, sess := range ss {
-		if err = txn.Remove(sess.ID); err != nil {
+		if _, err = txn.Delete(sess.ID); err != nil {
 			return
 		}
 	}
@@ -193,7 +194,8 @@ func (s *Sessions) Refesh(key, token string) (err error) {
 
 		// Set last action for session
 		sp.setAction()
-		return txn.Edit(sp.ID, sp)
+		_, err = txn.Put(sp.ID, sp)
+		return
 	})
 
 	return
@@ -219,7 +221,8 @@ func (s *Sessions) Remove(key, token string) (err error) {
 			return
 		}
 
-		return txn.Remove(sp.ID)
+		_, err = txn.Delete(sp.ID)
+		return
 	})
 
 	return

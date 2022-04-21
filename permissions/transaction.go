@@ -22,7 +22,7 @@ func (t *Transaction) Get(resourceID string) (rp *Resource, err error) {
 
 // GetByKey will get the resource entry for a given resource key
 func (t *Transaction) GetByKey(resourceKey string) (ep *Resource, err error) {
-	return getByKey(t.txn, resourceKey)
+	return t.p.getByKey(t.txn, resourceKey)
 }
 
 // SetPermissions will set the permissions for a resource key being accessed by given group
@@ -49,41 +49,12 @@ func (t *Transaction) UnsetPermissions(resourceKey, group string) (err error) {
 // Can will return if a user (userID) can perform a given action on a provided resource id
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (t *Transaction) Can(userID, resourceKey string, action Action) (can bool) {
-	var (
-		e      *Resource
-		groups []string
-		err    error
-	)
-
-	if e, err = getByKey(t.txn, resourceKey); err != nil {
-		return
-	}
-
-	if groups, err = t.p.g.Get(userID); err != nil {
-		return
-	}
-
-	for _, group := range groups {
-		if can = e.Can(group, action); can {
-			return
-		}
-	}
-
-	return
+	return t.p.can(t.txn, userID, resourceKey, action)
 }
 
 // Has will return whether or not an ID has a particular group associated with it
 func (t *Transaction) Has(resourceID, group string) (ok bool) {
-	var (
-		e   *Resource
-		err error
-	)
-
-	if e, err = t.txn.Get(resourceID); err != nil {
-		return
-	}
-
-	return e.Has(group)
+	return t.p.has(t.txn, resourceID, group)
 }
 
 // Groups will return a slice of the groups a user belongs to

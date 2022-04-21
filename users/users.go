@@ -50,14 +50,13 @@ type Users struct {
 	m *mojura.Mojura[*User]
 }
 
-func (u *Users) new(txn *mojura.Transaction[*User], user *User) (entryID string, err error) {
+func (u *Users) new(txn *mojura.Transaction[*User], user *User) (created *User, err error) {
 	if _, err = u.getByEmail(txn, user.Email); err == nil {
 		err = ErrEmailExists
 		return
 	}
 
-	entryID, err = txn.New(user)
-	return
+	return txn.New(user)
 }
 
 func (u *Users) getWithFn(id string, fn func(string, mojura.Value) error) (user *User, err error) {
@@ -77,27 +76,13 @@ func (u *Users) getByEmail(txn *mojura.Transaction[*User], email string) (up *Us
 	return txn.GetFirst(opts)
 }
 
-// edit will edit the user which matches the ID
-func (u *Users) edit(txn *mojura.Transaction[*User], id string, fn func(*User) error) (err error) {
-	var user *User
-	if user, err = txn.Get(id); err != nil {
-		return
-	}
-
-	if err = fn(user); err != nil {
-		return
-	}
-
-	return txn.Edit(id, user)
-}
-
 func (u *Users) updateEmail(txn *mojura.Transaction[*User], id, email string) (err error) {
 	if _, err = u.getByEmail(txn, email); err == nil {
 		err = ErrEmailExists
 		return
 	}
 
-	err = u.edit(txn, id, func(user *User) (err error) {
+	_, err = txn.Update(id, func(user *User) (err error) {
 		user.Email = email
 		return
 	})
@@ -106,7 +91,7 @@ func (u *Users) updateEmail(txn *mojura.Transaction[*User], id, email string) (e
 }
 
 func (u *Users) updatePassword(txn *mojura.Transaction[*User], id, password string) (err error) {
-	err = u.edit(txn, id, func(user *User) (err error) {
+	_, err = txn.Update(id, func(user *User) (err error) {
 		user.Password = password
 		return user.hashPassword()
 	})
@@ -115,7 +100,7 @@ func (u *Users) updatePassword(txn *mojura.Transaction[*User], id, password stri
 }
 
 func (u *Users) updateVerified(txn *mojura.Transaction[*User], id string, verified bool) (err error) {
-	err = u.edit(txn, id, func(user *User) (err error) {
+	_, err = txn.Update(id, func(user *User) (err error) {
 		user.Verified = verified
 		return
 	})
@@ -124,7 +109,7 @@ func (u *Users) updateVerified(txn *mojura.Transaction[*User], id string, verifi
 }
 
 func (u *Users) updateDisabled(txn *mojura.Transaction[*User], id string, disabled bool) (err error) {
-	err = u.edit(txn, id, func(user *User) (err error) {
+	_, err = txn.Update(id, func(user *User) (err error) {
 		user.Disabled = disabled
 		return
 	})
@@ -133,7 +118,7 @@ func (u *Users) updateDisabled(txn *mojura.Transaction[*User], id string, disabl
 }
 
 func (u *Users) updateLastLoggedInAt(txn *mojura.Transaction[*User], id string, lastLoggedInAt int64) (err error) {
-	err = u.edit(txn, id, func(user *User) (err error) {
+	_, err = txn.Update(id, func(user *User) (err error) {
 		user.LastLoggedInAt = lastLoggedInAt
 		return
 	})
@@ -188,7 +173,7 @@ func (u *Users) matchEmail(txn *mojura.Transaction[*User], email, password strin
 }
 
 // New will create a new user
-func (u *Users) New(email, password string) (entryID string, err error) {
+func (u *Users) New(email, password string) (created *User, err error) {
 	if len(email) == 0 {
 		err = ErrInvalidEmail
 		return
@@ -202,7 +187,7 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 	}
 
 	err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
-		entryID, err = u.new(txn, &user)
+		created, err = u.new(txn, &user)
 		return
 	})
 
@@ -211,7 +196,7 @@ func (u *Users) New(email, password string) (entryID string, err error) {
 
 // Insert will insert an existing user
 // Note: No password hashing will occur
-func (u *Users) Insert(email, password string) (entryID string, err error) {
+func (u *Users) Insert(email, password string) (created *User, err error) {
 	if len(email) == 0 {
 		err = ErrInvalidEmail
 		return
@@ -221,7 +206,7 @@ func (u *Users) Insert(email, password string) (entryID string, err error) {
 	user.sanitize()
 
 	err = u.m.Transaction(context.Background(), func(txn *mojura.Transaction[*User]) (err error) {
-		entryID, err = u.new(txn, &user)
+		created, err = u.new(txn, &user)
 		return
 	})
 

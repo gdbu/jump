@@ -2,10 +2,12 @@ package permissions
 
 import (
 	"context"
+	"log"
 
 	"github.com/gdbu/jump/groups"
 	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
+	"github.com/mojura/mojura/filters"
 )
 
 const (
@@ -40,41 +42,6 @@ type Permissions struct {
 	g *groups.Groups
 }
 
-func (p *Permissions) setPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string, actions Action) (err error) {
-	var r *Resource
-	if r, err = getOrCreateByKey(txn, resourceKey); err != nil {
-		return
-	}
-
-	if !r.Set(group, actions) {
-		return
-	}
-
-	return txn.Edit(r.ID, r)
-}
-
-func (p *Permissions) unsetPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string) (err error) {
-	var r *Resource
-	if r, err = getByKey(txn, resourceKey); err != nil {
-		return
-	}
-
-	if !r.Remove(group) {
-		return
-	}
-
-	return txn.Edit(r.ID, r)
-}
-
-func (p *Permissions) removeResource(txn *mojura.Transaction[*Resource], resourceKey string) (err error) {
-	var r *Resource
-	if r, err = getByKey(txn, resourceKey); err != nil {
-		return
-	}
-
-	return txn.Remove(r.ID)
-}
-
 // Get will get the resource entry for a given resource ID
 func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
 	return p.c.Get(resourceID)
@@ -82,7 +49,12 @@ func (p *Permissions) Get(resourceID string) (ep *Resource, err error) {
 
 // GetByKey will get the resource entry for a given resource key
 func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
-	return getByKey(p.c, resourceKey)
+	err = p.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
+		r, err = p.getByKey(txn, resourceKey)
+		return
+	})
+
+	return
 }
 
 // SetPermissions will set the permissions for a resource key being accessed by given group
@@ -136,41 +108,28 @@ func (p *Permissions) UnsetMultiPermissions(resourceKey string, groups ...string
 // Can will return if a user (userID) can perform a given action on a provided resource id
 // Note: This isn't done as a transaction because it's two GET requests which don't need to block
 func (p *Permissions) Can(userID, resourceKey string, action Action) (can bool) {
-	var (
-		e      *Resource
-		groups []string
-		err    error
-	)
-
-	if e, err = getByKey(p.c, resourceKey); err != nil {
+	if err := p.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
+		can = p.can(txn, userID, resourceKey, action)
 		return
-	}
-
-	if groups, err = p.g.Get(userID); err != nil {
+	}); err != nil {
+		log.Printf("Permissions.Can(): Error checking can state: %v", err)
 		return
-	}
-
-	for _, group := range groups {
-		if can = e.Can(group, action); can {
-			return
-		}
 	}
 
 	return
 }
 
 // Has will return whether or not an ID has a particular group associated with it
-func (p *Permissions) Has(resourceID, group string) (ok bool) {
-	var (
-		e   *Resource
-		err error
-	)
-
-	if e, err = p.c.Get(resourceID); err != nil {
+func (p *Permissions) Has(resourceID, group string) (has bool) {
+	if err := p.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
+		has = p.has(txn, resourceID, group)
+		return
+	}); err != nil {
+		log.Printf("Permissions.Can(): Error checking can state: %v", err)
 		return
 	}
 
-	return e.Has(group)
+	return
 }
 
 // RemoveResource will remove a resource by key
@@ -204,15 +163,111 @@ func (p *Permissions) Close() (err error) {
 	return p.c.Close()
 }
 
-// NewPair will return a new permissions pair
-func NewPair(group string, actions Action) (p Pair) {
-	p.Group = group
-	p.Actions = actions
+func (p *Permissions) setPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string, actions Action) (err error) {
+	var r *Resource
+	if r, err = p.getOrCreateByKey(txn, resourceKey); err != nil {
+		return
+	}
+
+	if !r.Set(group, actions) {
+		return
+	}
+
+	_, err = txn.Put(r.ID, r)
 	return
 }
 
-// Pair represents a permissions pair
-type Pair struct {
-	Group   string
-	Actions Action
+func (p *Permissions) unsetPermissions(txn *mojura.Transaction[*Resource], resourceKey, group string) (err error) {
+	var r *Resource
+	if r, err = p.getByKey(txn, resourceKey); err != nil {
+		return
+	}
+
+	if !r.Remove(group) {
+		return
+	}
+
+	_, err = txn.Put(r.ID, r)
+	return
+}
+
+func (p *Permissions) removeResource(txn *mojura.Transaction[*Resource], resourceKey string) (err error) {
+	var r *Resource
+	if r, err = p.getByKey(txn, resourceKey); err != nil {
+		return
+	}
+
+	_, err = txn.Delete(r.ID)
+	return
+}
+
+func (p *Permissions) getByKey(txn *mojura.Transaction[*Resource], resourceKey string) (r *Resource, err error) {
+	var rs []*Resource
+	filter := filters.Match(relationshipResourceKeys, resourceKey)
+	opts := mojura.NewFilteringOpts(filter)
+	if rs, _, err = txn.GetFiltered(opts); err != nil {
+		return
+	}
+
+	if len(rs) == 0 {
+		err = ErrResourceNotFound
+		return
+	}
+
+	r = rs[0]
+	return
+}
+
+func (p *Permissions) getOrCreateByKey(txn *mojura.Transaction[*Resource], resourceKey string) (rp *Resource, err error) {
+	if rp, err = p.getByKey(txn, resourceKey); err != ErrResourceNotFound {
+		return
+	}
+
+	r := makeResource(resourceKey)
+	if _, err = txn.New(&r); err != nil {
+		return
+	}
+
+	rp = &r
+	return
+}
+
+// Can will return if a user (userID) can perform a given action on a provided resource id
+// Note: This isn't done as a transaction because it's two GET requests which don't need to block
+func (p *Permissions) can(txn *mojura.Transaction[*Resource], userID, resourceKey string, action Action) (can bool) {
+	var (
+		e      *Resource
+		groups []string
+		err    error
+	)
+
+	if e, err = p.getByKey(txn, resourceKey); err != nil {
+		return
+	}
+
+	if groups, err = p.g.Get(userID); err != nil {
+		return
+	}
+
+	for _, group := range groups {
+		if can = e.Can(group, action); can {
+			return
+		}
+	}
+
+	return
+}
+
+// Has will return whether or not an ID has a particular group associated with it
+func (p *Permissions) has(txn *mojura.Transaction[*Resource], resourceID, group string) (ok bool) {
+	var (
+		e   *Resource
+		err error
+	)
+
+	if e, err = txn.Get(resourceID); err != nil {
+		return
+	}
+
+	return e.Has(group)
 }

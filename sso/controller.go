@@ -310,7 +310,7 @@ func (c *Controller) delete(txn *mojura.Transaction[*Entry], userID string) (rem
 		return
 	}
 
-	if err = txn.Remove(e.ID); err != nil {
+	if _, err = txn.Delete(e.ID); err != nil {
 		return
 	}
 
@@ -330,7 +330,7 @@ func (c *Controller) deleteByUser(txn *mojura.Transaction[*Entry], userID string
 		return
 	}
 
-	if err = txn.Remove(e.ID); err != nil {
+	if _, err = txn.Delete(e.ID); err != nil {
 		return
 	}
 
@@ -350,7 +350,7 @@ func (c *Controller) deleteByCode(txn *mojura.Transaction[*Entry], loginCode str
 		return
 	}
 
-	if err = txn.Remove(e.ID); err != nil {
+	if _, err = txn.Delete(e.ID); err != nil {
 		return
 	}
 
@@ -428,7 +428,7 @@ func (c *Controller) multiLogin(txn *mojura.Transaction[*Entry], loginCode strin
 	newExpiration := now.Add(ttl)
 	if entry.ExpiresAt.After(newExpiration) {
 		entry.ExpiresAt = newExpiration
-		if err = txn.Edit(entry.ID, entry); err != nil {
+		if _, err = txn.Put(entry.ID, entry); err != nil {
 			return
 		}
 	}
