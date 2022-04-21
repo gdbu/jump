@@ -124,7 +124,8 @@ func (a *APIKeys) updateName(txn *mojura.Transaction[*APIKey], apiKey, name stri
 	}
 
 	match.Name = name
-	return txn.Edit(match.ID, match)
+	_, err = txn.Put(match.ID, match)
+	return
 }
 
 func (a *APIKeys) remove(txn *mojura.Transaction[*APIKey], apiKey string) (removed *APIKey, err error) {
@@ -133,10 +134,5 @@ func (a *APIKeys) remove(txn *mojura.Transaction[*APIKey], apiKey string) (remov
 		return
 	}
 
-	if err = txn.Remove(match.ID); err != nil {
-		return
-	}
-
-	removed = match
-	return
+	return txn.Delete(match.ID)
 }

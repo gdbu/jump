@@ -36,20 +36,24 @@ func (j *Jump) setLastLoggedInAt(userID string, timestamp int64) (err error) {
 // CreateUser will create a user and assign it's basic groups
 // Note: It is advised that this function is used when creating users rather than directly calling j.Users().New()
 func (j *Jump) CreateUser(email, password string, groups ...string) (userID, apiKey string, err error) {
-	if userID, err = j.usrs.New(email, password); err != nil {
+	var u *users.User
+	if u, err = j.usrs.New(email, password); err != nil {
 		return
 	}
 
+	userID = u.ID
 	apiKey, err = j.postUserCreateActions(userID, groups)
 	return
 }
 
 // InsertUser will insert an existing user (no password hashing)
 func (j *Jump) InsertUser(email, password string, groups ...string) (userID, apiKey string, err error) {
-	if userID, err = j.usrs.Insert(email, password); err != nil {
+	var u *users.User
+	if u, err = j.usrs.Insert(email, password); err != nil {
 		return
 	}
 
+	userID = u.ID
 	apiKey, err = j.postUserCreateActions(userID, groups)
 	return
 }

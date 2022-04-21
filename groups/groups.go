@@ -160,16 +160,7 @@ func (g *Groups) update(txn *mojura.Transaction[*Entry], userID string, fn func(
 		return
 	}
 
-	if err = fn(e); err != nil {
-		return
-	}
-
-	if err = txn.Edit(e.ID, e); err != nil {
-		return
-	}
-
-	updated = e
-	return
+	return txn.Update(e.ID, fn)
 }
 
 // get will get an Entry by user ID
