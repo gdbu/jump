@@ -14,11 +14,6 @@ func makeUser(email, password string) (u User) {
 	return
 }
 
-func newUser() *User {
-	var u User
-	return &u
-}
-
 // User represents a user
 type User struct {
 	mojura.Entry

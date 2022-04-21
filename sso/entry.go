@@ -25,11 +25,6 @@ func makeEntry(userID string) (e Entry) {
 	return
 }
 
-func newEntry() *Entry {
-	var e Entry
-	return &e
-}
-
 // Entry represents a stored entry within the Controller
 type Entry struct {
 	// Include mojura.Entry to auto-populate fields/methods needed to match the
