@@ -2,7 +2,7 @@ package permissions
 
 import "github.com/mojura/mojura"
 
-func newTransaction(txn *mojura.Transaction[Resource, *Resource], p *Permissions) (t Transaction) {
+func newTransaction(txn *mojura.Transaction[*Resource], p *Permissions) (t Transaction) {
 	t.txn = txn
 	t.p = p
 	return
@@ -11,7 +11,7 @@ func newTransaction(txn *mojura.Transaction[Resource, *Resource], p *Permissions
 
 // Transaction is the reminders manager
 type Transaction struct {
-	txn *mojura.Transaction[Resource, *Resource]
+	txn *mojura.Transaction[*Resource]
 	p   *Permissions
 }
 
