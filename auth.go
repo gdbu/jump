@@ -8,7 +8,7 @@ import (
 	"github.com/gdbu/jump/sso"
 	"github.com/gdbu/jump/users"
 	"github.com/hatchify/errors"
-	"github.com/vroomy/common"
+	"github.com/vroomy/httpserve"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 
 // Login will attempt to login with a provided email and password combo
 // If successful, a key/token pair will be returned to represent the session pair
-func (j *Jump) Login(ctx common.Context, email, password string) (userID string, err error) {
+func (j *Jump) Login(ctx *httpserve.Context, email, password string) (userID string, err error) {
 	if userID, err = j.usrs.MatchEmail(email, password); err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (j *Jump) NewSSO(ctx context.Context, email string) (loginCode string, err 
 
 // SSOLogin will attempt to login with a provided login code
 // If successful, a key/token pair will be returned to represent the session pair
-func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
+func (j *Jump) SSOLogin(ctx *httpserve.Context, loginCode string) (err error) {
 	var userID string
 	if userID, err = j.sso.Login(ctx.Request().Context(), loginCode); err != nil {
 		return
@@ -73,7 +73,7 @@ func (j *Jump) SSOLogin(ctx common.Context, loginCode string) (err error) {
 // If successful, a key/token pair will be returned to represent the session pair
 // Note: Instead of the login code being instantly destroyed, it now has a 30 second TTL
 // after usage.
-func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string, ttl time.Duration) (err error) {
+func (j *Jump) SSOMultiLogin(ctx *httpserve.Context, loginCode string, ttl time.Duration) (err error) {
 	var userID string
 	if userID, err = j.sso.MultiLogin(ctx.Request().Context(), loginCode, ttl); err != nil {
 		return
@@ -91,7 +91,7 @@ func (j *Jump) SSOMultiLogin(ctx common.Context, loginCode string, ttl time.Dura
 }
 
 // Logout is the logout handler
-func (j *Jump) Logout(ctx common.Context) (err error) {
+func (j *Jump) Logout(ctx *httpserve.Context) (err error) {
 	userID := ctx.Get("userID")
 	if len(userID) == 0 {
 		return ErrAlreadyLoggedOut
