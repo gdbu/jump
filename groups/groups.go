@@ -23,7 +23,7 @@ func New(opts mojura.Opts) (gp *Groups, err error) {
 	opts.Name = "usergroups"
 
 	var g Groups
-	if g.c, err = mojura.New[Entry](opts, relationships...); err != nil {
+	if g.c, err = mojura.New[*Entry](opts, relationships...); err != nil {
 		return
 	}
 
@@ -33,12 +33,12 @@ func New(opts mojura.Opts) (gp *Groups, err error) {
 
 // Groups manages the users
 type Groups struct {
-	c *mojura.Mojura[Entry, *Entry]
+	c *mojura.Mojura[*Entry]
 }
 
 // Get will get an Entry by user ID
 func (g *Groups) Get(userID string) (groups []string, err error) {
-	err = g.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
+	err = g.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Entry]) (err error) {
 		var e *Entry
 		e, err = g.get(txn, userID)
 		switch err {
@@ -66,7 +66,7 @@ func (g *Groups) AddGroups(userID string, groups ...string) (updated *Entry, err
 		return
 	}
 
-	err = g.c.Transaction(context.Background(), func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
+	err = g.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Entry]) (err error) {
 		// Attempt to update the Entry for the given user ID
 		if updated, err = g.update(txn, userID, updateFn); err != mojura.ErrEntryNotFound {
 			// Error is either nil or an unexpected error. Either way, we want to return
@@ -90,7 +90,7 @@ func (g *Groups) RemoveGroups(userID string, groups ...string) (updated *Entry, 
 		return
 	}
 
-	err = g.c.Transaction(context.Background(), func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
+	err = g.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Entry]) (err error) {
 		// Attempt to update the Entry for the given user ID
 		if updated, err = g.update(txn, userID, updateFn); err != mojura.ErrEntryNotFound {
 			// Error is either nil or an unexpected error. Either way, we want to return
@@ -107,7 +107,7 @@ func (g *Groups) RemoveGroups(userID string, groups ...string) (updated *Entry, 
 
 // HasGroup will determine if a user ID has a given group
 func (g *Groups) HasGroup(userID string, group string) (hasGroup bool, err error) {
-	err = g.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[Entry, *Entry]) (err error) {
+	err = g.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Entry]) (err error) {
 		var e *Entry
 		e, err = g.get(txn, userID)
 		switch err {
@@ -140,12 +140,12 @@ func (g *Groups) Close() (err error) {
 }
 
 // new will create an Entry for a given user ID
-func (g *Groups) new(txn *mojura.Transaction[Entry, *Entry], userID string, groups []string) (created *Entry, err error) {
+func (g *Groups) new(txn *mojura.Transaction[*Entry], userID string, groups []string) (created *Entry, err error) {
 	var e Entry
 	e.UserID = userID
 	e.Groups = stringset.MakeMap(groups...)
 
-	if _, err = txn.New(e); err != nil {
+	if _, err = txn.New(&e); err != nil {
 		return
 	}
 
@@ -154,7 +154,7 @@ func (g *Groups) new(txn *mojura.Transaction[Entry, *Entry], userID string, grou
 }
 
 // update will edit an Entry
-func (g *Groups) update(txn *mojura.Transaction[Entry, *Entry], userID string, fn func(*Entry) error) (updated *Entry, err error) {
+func (g *Groups) update(txn *mojura.Transaction[*Entry], userID string, fn func(*Entry) error) (updated *Entry, err error) {
 	var e *Entry
 	if e, err = g.get(txn, userID); err != nil {
 		return
@@ -164,7 +164,7 @@ func (g *Groups) update(txn *mojura.Transaction[Entry, *Entry], userID string, f
 }
 
 // get will get an Entry by user ID
-func (g *Groups) get(txn *mojura.Transaction[Entry, *Entry], userID string) (entry *Entry, err error) {
+func (g *Groups) get(txn *mojura.Transaction[*Entry], userID string) (entry *Entry, err error) {
 	filter := filters.Match(relationshipUsers, userID)
 	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)

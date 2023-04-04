@@ -6,7 +6,7 @@ import (
 	"github.com/mojura/mojura"
 )
 
-func newTransaction(txn *mojura.Transaction[Entry, *Entry], c *Controller) *Transaction {
+func newTransaction(txn *mojura.Transaction[*Entry], c *Controller) *Transaction {
 	var t Transaction
 	t.txn = txn
 	t.c = c
@@ -15,7 +15,7 @@ func newTransaction(txn *mojura.Transaction[Entry, *Entry], c *Controller) *Tran
 
 // Transaction represents a controller transaction
 type Transaction struct {
-	txn *mojura.Transaction[Entry, *Entry]
+	txn *mojura.Transaction[*Entry]
 	c   *Controller
 }
 
