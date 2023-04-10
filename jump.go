@@ -10,6 +10,7 @@ import (
 	"github.com/hatchify/errors"
 
 	"github.com/gdbu/jump/apikeys"
+	"github.com/gdbu/jump/events"
 	"github.com/gdbu/jump/groups"
 	"github.com/gdbu/jump/permissions"
 	"github.com/gdbu/jump/sessions"
@@ -39,6 +40,7 @@ const (
 func New(opts mojura.Opts) (jp *Jump, err error) {
 	var j Jump
 	j.out = scribe.New("Jump")
+	j.evts = events.New()
 	if j.perm, err = permissions.New(opts); err != nil {
 		return
 	}
@@ -51,7 +53,7 @@ func New(opts mojura.Opts) (jp *Jump, err error) {
 		return
 	}
 
-	if j.usrs, err = users.New(opts); err != nil {
+	if j.usrs, err = users.New(opts, j.evts); err != nil {
 		return
 	}
 
@@ -78,6 +80,7 @@ type Jump struct {
 	usrs *users.Users
 	grps *groups.Groups
 	sso  *sso.Controller
+	evts *events.Controller
 }
 
 func (j *Jump) getUserIDFromAPIKey(apiKey string) (userID string, err error) {
@@ -120,6 +123,11 @@ func (j *Jump) getUserIDFromSession(req *http.Request) (userID string, err error
 
 	userID = sess.UserID
 	return
+}
+
+// Events will return the underlying Events controller
+func (j *Jump) Events() *events.Controller {
+	return j.evts
 }
 
 // Permissions will return the underlying permissions
