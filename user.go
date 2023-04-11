@@ -29,7 +29,7 @@ func (j *Jump) postUserCreateActions(userID string, groups []string) (apiKey str
 
 // setLastLoggedInAt sets user last logged in at on the user struct
 func (j *Jump) setLastLoggedInAt(userID string, timestamp int64) (err error) {
-	err = j.usrs.UpdateLastLoggedInAt(userID, timestamp)
+	_, err = j.usrs.UpdateLastLoggedInAt(userID, timestamp)
 	return
 }
 
@@ -64,12 +64,12 @@ func (j *Jump) GetUser(userID string) (user *users.User, err error) {
 }
 
 // UpdateEmail will update a user's email address
-func (j *Jump) UpdateEmail(userID, newEmail string) (err error) {
+func (j *Jump) UpdateEmail(userID, newEmail string) (updated *users.User, err error) {
 	return j.usrs.UpdateEmail(userID, newEmail)
 }
 
 // UpdatePassword is the update password handler
-func (j *Jump) UpdatePassword(userID, newPassword string) (err error) {
+func (j *Jump) UpdatePassword(userID, newPassword string) (updated *users.User, err error) {
 	return j.usrs.UpdatePassword(userID, newPassword)
 }
 
