@@ -57,6 +57,22 @@ func (g *Groups) Get(userID string) (groups []string, err error) {
 	return
 }
 
+// GetByGroup will get user IDs associated with a given group
+func (g *Groups) GetByGroup(group string) (userIDs []string, err error) {
+	var es []*Entry
+	err = g.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Entry]) (err error) {
+		es, err = g.getByGroup(txn, group)
+		return
+	})
+
+	userIDs = make([]string, 0, len(es))
+	for _, e := range es {
+		userIDs = append(userIDs, e.UserID)
+	}
+
+	return
+}
+
 // AddGroups will add the provdied groups to a user
 func (g *Groups) AddGroups(userID string, groups ...string) (updated *Entry, err error) {
 	// Set update func
@@ -168,4 +184,12 @@ func (g *Groups) get(txn *mojura.Transaction[*Entry], userID string) (entry *Ent
 	filter := filters.Match(relationshipUsers, userID)
 	opts := mojura.NewFilteringOpts(filter)
 	return txn.GetFirst(opts)
+}
+
+// getByGroup will get entries by group
+func (g *Groups) getByGroup(txn *mojura.Transaction[*Entry], group string) (es []*Entry, err error) {
+	filter := filters.Match(relationshipGroups, group)
+	opts := mojura.NewFilteringOpts(filter)
+	es, _, err = txn.GetFiltered(opts)
+	return
 }
