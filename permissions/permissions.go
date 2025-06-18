@@ -57,6 +57,18 @@ func (p *Permissions) GetByKey(resourceKey string) (r *Resource, err error) {
 	return
 }
 
+// ForEach will iterate through resources
+func (p *Permissions) ForEach(fn func(*Resource) error, opts *mojura.FilteringOpts) (err error) {
+	err = p.c.ReadTransaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {
+		err = txn.ForEach(func(_ string, value *Resource) (err error) {
+			return fn(value)
+		}, opts)
+		return
+	})
+
+	return
+}
+
 // SetPermissions will set the permissions for a resource key being accessed by given group
 func (p *Permissions) SetPermissions(resourceKey, group string, actions Action) (err error) {
 	err = p.c.Transaction(context.Background(), func(txn *mojura.Transaction[*Resource]) (err error) {

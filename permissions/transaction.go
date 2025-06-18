@@ -25,6 +25,14 @@ func (t *Transaction) GetByKey(resourceKey string) (ep *Resource, err error) {
 	return t.p.getByKey(t.txn, resourceKey)
 }
 
+// ForEach will iterate through resources
+func (t *Transaction) ForEach(fn func(*Resource) error, opts *mojura.FilteringOpts) (err error) {
+	err = t.txn.ForEach(func(_ string, value *Resource) (err error) {
+		return fn(value)
+	}, opts)
+	return
+}
+
 // SetPermissions will set the permissions for a resource key being accessed by given group
 func (t *Transaction) SetPermissions(resourceKey, group string, actions Action) (err error) {
 	return t.p.setPermissions(t.txn, resourceKey, group, actions)
