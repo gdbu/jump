@@ -1,6 +1,8 @@
 package jump
 
 import (
+	"fmt"
+
 	"github.com/gdbu/jump/permissions"
 	"github.com/vroomy/httpserve"
 )
@@ -13,7 +15,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 
 		var resourceID string
 		if resourceID = ctx.Get("resourceID"); len(resourceID) == 0 {
-			j.out.Errorf("Error setting permissions: %v", ErrResourceIDIsEmpty)
+			j.out.Error(fmt.Sprintf("Error setting permissions: %v", ErrResourceIDIsEmpty))
 			return
 		}
 
@@ -22,7 +24,7 @@ func (j *Jump) newPermissionHook(userID, resourceName string, actions, adminActi
 
 		var err error
 		if err = j.SetPermission(resourceKey, userID, actions, adminActions); err != nil {
-			j.out.Errorf("Error setting permissons for %s / %s: %v", userID, resourceName, err)
+			j.out.Error(fmt.Sprintf("Error setting permissons for %s / %s: %v", userID, resourceName, err))
 		}
 	}
 }

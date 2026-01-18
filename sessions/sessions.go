@@ -2,12 +2,12 @@ package sessions
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"time"
 
-	"github.com/gdbu/scribe"
+	"github.com/gdbu/errors"
 	"github.com/gdbu/uuid"
-	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -33,10 +33,8 @@ var (
 
 // New will return a new instance of sessions
 func New(opts mojura.Opts) (sp *Sessions, err error) {
-	opts.Name = "sessions"
-
 	var s Sessions
-	s.out = scribe.New("Sessions")
+	s.out = mojura.NewLogger()
 	if s.c, err = mojura.New[*Session](opts, relationships...); err != nil {
 		return
 	}
@@ -54,7 +52,7 @@ func New(opts mojura.Opts) (sp *Sessions, err error) {
 
 // Sessions manages sessions
 type Sessions struct {
-	out *scribe.Scribe
+	out mojura.Logger
 	c   *mojura.Mojura[*Session]
 	g   *uuid.Generator
 }
@@ -102,7 +100,7 @@ func (s *Sessions) loop() {
 	for {
 		oldest := time.Now().Add(time.Second * -SessionTimeout).Unix()
 		if err := s.Purge(oldest); err != nil {
-			s.out.Errorf("error purging: %v", err)
+			s.out.Error(fmt.Sprintf("error purging: %v", err))
 		}
 
 		time.Sleep(time.Minute)

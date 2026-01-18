@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/gdbu/errors"
 	"github.com/gdbu/jump/permissions"
-	"github.com/hatchify/errors"
 
 	"github.com/vroomy/httpserve"
 )
@@ -23,7 +23,7 @@ func (j *Jump) NewGrantPermissionsMW(resourceName string, actions, adminActions 
 		)
 
 		if userID, err = getUserID(ctx); err != nil {
-			j.out.Errorf("Error getting user id while setting permissions: %v", err)
+			j.out.Error(fmt.Sprintf("Error getting user id while setting permissions: %v", err))
 			return
 		}
 

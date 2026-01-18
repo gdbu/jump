@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gdbu/scribe"
 	"github.com/mojura/mojura"
 
-	"github.com/hatchify/errors"
+	"github.com/gdbu/errors"
 
 	"github.com/gdbu/jump/apikeys"
 	"github.com/gdbu/jump/events"
@@ -39,7 +38,7 @@ const (
 // New will return a new instance of Jump
 func New(opts mojura.Opts) (jp *Jump, err error) {
 	var j Jump
-	j.out = scribe.New("Jump")
+	j.out = mojura.NewLogger()
 	j.evts = events.New()
 	if j.perm, err = permissions.New(opts); err != nil {
 		return
@@ -72,7 +71,7 @@ func New(opts mojura.Opts) (jp *Jump, err error) {
 
 // Jump manages the basic ancillary components of a web service
 type Jump struct {
-	out *scribe.Scribe
+	out mojura.Logger
 
 	perm *permissions.Permissions
 	sess *sessions.Sessions

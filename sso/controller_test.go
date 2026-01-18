@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hatchify/errors"
+	"github.com/gdbu/errors"
 	"github.com/mojura/mojura"
 )
 

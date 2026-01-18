@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gdbu/scribe"
+	"github.com/gdbu/errors"
 	"github.com/gdbu/uuid"
-	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )
@@ -52,7 +51,7 @@ func New(opts mojura.Opts) (cc *Controller, err error) {
 		return
 	}
 
-	c.out = scribe.New("SSO")
+	c.out = mojura.NewLogger()
 	c.updateCh = make(chan struct{}, 1)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	go c.expirationScan()
@@ -63,7 +62,7 @@ func New(opts mojura.Opts) (cc *Controller, err error) {
 
 // Controller represents a management layer to facilitate the retrieval and modification of Entries
 type Controller struct {
-	out *scribe.Scribe
+	out mojura.Logger
 
 	// Core will manage the data layer and will utilize the underlying back-end
 	m *mojura.Mojura[*Entry]
@@ -460,7 +459,7 @@ func (c *Controller) expirationScan() {
 			continue
 
 		default:
-			c.out.Errorf("error getting next to expire: %v", err)
+			c.out.Error(fmt.Sprintf("error getting next to expire: %v", err))
 			// Wait for new update to come through update channel
 			<-c.updateCh
 			continue
@@ -471,7 +470,7 @@ func (c *Controller) expirationScan() {
 		}
 
 		if _, err = c.Delete(context.Background(), next.ID); err != nil {
-			c.out.Errorf("error deleting next to expire: %v", err)
+			c.out.Error(fmt.Sprintf("error deleting next to expire: %v", err))
 			continue
 		}
 	}
