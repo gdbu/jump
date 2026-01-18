@@ -3,8 +3,8 @@ package apikeys
 import (
 	"context"
 
+	"github.com/gdbu/errors"
 	"github.com/gdbu/uuid"
-	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
 	"github.com/mojura/mojura/filters"
 )

@@ -3,7 +3,7 @@ package users
 import (
 	"strings"
 
-	"github.com/hatchify/errors"
+	"github.com/gdbu/errors"
 	"github.com/mojura/mojura"
 	"golang.org/x/crypto/bcrypt"
 )

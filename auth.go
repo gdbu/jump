@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gdbu/errors"
 	"github.com/gdbu/jump/sso"
 	"github.com/gdbu/jump/users"
-	"github.com/hatchify/errors"
 	"github.com/vroomy/httpserve"
 )
 

@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gdbu/errors"
 	"github.com/gdbu/jump/groups"
-	"github.com/hatchify/errors"
 	"github.com/mojura/mojura"
 )
 
