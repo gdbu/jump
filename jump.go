@@ -41,26 +41,32 @@ func New(opts mojura.Opts) (jp *Jump, err error) {
 	j.out = mojura.NewLogger()
 	j.evts = events.New()
 	if j.perm, err = permissions.New(opts); err != nil {
+		err = fmt.Errorf("error initializing permissions: %v", err)
 		return
 	}
 
 	if j.sess, err = sessions.New(opts); err != nil {
+		err = fmt.Errorf("error initializing sessions: %v", err)
 		return
 	}
 
 	if j.api, err = apikeys.New(opts); err != nil {
+		err = fmt.Errorf("error initializing API keys: %v", err)
 		return
 	}
 
 	if j.usrs, err = users.New(opts, j.evts); err != nil {
+		err = fmt.Errorf("error initializing users: %v", err)
 		return
 	}
 
 	if j.grps, err = groups.New(opts); err != nil {
+		err = fmt.Errorf("error initializing groups: %v", err)
 		return
 	}
 
 	if j.sso, err = sso.New(opts); err != nil {
+		err = fmt.Errorf("error initializing SSO: %v", err)
 		return
 	}
 

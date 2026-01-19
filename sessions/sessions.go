@@ -34,6 +34,7 @@ var (
 // New will return a new instance of sessions
 func New(opts mojura.Opts) (sp *Sessions, err error) {
 	var s Sessions
+	opts.Name = "sessions"
 	s.out = mojura.NewLogger()
 	if s.c, err = mojura.New[*Session](opts, relationships...); err != nil {
 		return
