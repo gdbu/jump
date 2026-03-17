@@ -4,8 +4,8 @@ import "sync"
 
 func New() *Controller {
 	var c Controller
-	c.in = make(chan Event, 128)
 	c.s = make(subscribers, 32)
+	c.cond = sync.NewCond(&c.queueMux)
 	go c.scan()
 	return &c
 }
@@ -13,12 +13,16 @@ func New() *Controller {
 type Controller struct {
 	mux sync.RWMutex
 
-	in chan Event
-	s  subscribers
+	queueMux sync.Mutex
+	cond     *sync.Cond
+	queue    []Event
+
+	s subscribers
 }
 
 func (c *Controller) New(e Event) {
-	c.in <- e
+	c.appendEvent(e)
+	c.cond.Signal()
 }
 
 func (c *Controller) Subscribe(fn func(Event), subscribingTo ...string) {
@@ -28,13 +32,41 @@ func (c *Controller) Subscribe(fn func(Event), subscribingTo ...string) {
 }
 
 func (c *Controller) scan() {
-	for event := range c.in {
-		c.notify(event)
+	for {
+		e := c.getNextEvent()
+		c.notify(e)
 	}
 }
 
-func (c *Controller) notify(event Event) {
+func (c *Controller) appendEvent(e Event) {
+	c.queueMux.Lock()
+	defer c.queueMux.Unlock()
+	c.queue = append(c.queue, e)
+}
+
+func (c *Controller) getNextEvent() (e Event) {
+	c.queueMux.Lock()
+	defer c.queueMux.Unlock()
+	for len(c.queue) == 0 {
+		c.cond.Wait()
+	}
+
+	e = c.queue[0]
+	c.queue[0] = Event{}
+	c.queue = c.queue[1:]
+	return e
+}
+
+func (c *Controller) getFuncs(key string) (out []func(Event)) {
 	c.mux.RLock()
 	defer c.mux.RUnlock()
-	c.s.notify(event)
+	return c.s.snapshot(key)
+}
+
+func (c *Controller) notify(event Event) {
+	fns := c.getFuncs(event.Key)
+
+	for _, fn := range fns {
+		fn(event)
+	}
 }

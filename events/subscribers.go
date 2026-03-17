@@ -2,15 +2,15 @@ package events
 
 type subscribers map[string][]func(Event)
 
-func (s subscribers) notify(e Event) {
-	fns, ok := s[e.Key]
+func (s subscribers) snapshot(key string) []func(Event) {
+	fns, ok := s[key]
 	if !ok {
-		return
+		return nil
 	}
 
-	for _, fn := range fns {
-		fn(e)
-	}
+	cp := make([]func(Event), len(fns))
+	copy(cp, fns)
+	return cp
 }
 
 func (s subscribers) subscribe(fn func(Event), subscribingTo []string) {
